@@ -1,0 +1,160 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f172a; /* Fondo oscuro fijo */
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff; /* Texto blanco para contraste */
+}
+
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column; /* Para apilar header y text-block verticalmente */
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  padding: 20px; /* Espacio en bordes para móviles */
+  text-align: center;
+  gap: 40px; /* Espacio entre header y text-block */
+}
+
+.header-title {
+  animation: fadeInUp 1s ease-out; /* Animación de entrada suave */
+}
+
+.header-title h1 {
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  color: #00ffc3; /* Verde cian para resaltar, coherente con slider */
+  text-shadow: 0 0 10px rgba(0, 255, 195, 0.5);
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin: 0 0 15px 0;
+  color: #94a3b8; /* Gris claro para subtítulo */
+  font-weight: 300;
+}
+
+.description {
+  font-size: 1rem;
+  margin: 0;
+  color: #cbd5e1; /* Gris más claro para descripción */
+  max-width: 600px;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.text-block {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(0, 255, 195, 0.3); /* Borde verde cian sutil */
+  padding: 40px 60px;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.5s ease, box-shadow 0.5s ease, border-color 0.3s ease;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.text-block i {
+  font-size: 3rem;
+  color: #00ffc3;
+  margin-bottom: 10px;
+  animation: pulse 2s infinite; /* Animación sutil de pulso en el ícono */
+}
+
+.text-block h2 {
+  margin: 0 0 5px 0;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.text-block p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+
+.text-block:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 255, 195, 0.3); /* Sombra verde al hover */
+  border-color: rgba(0, 255, 195, 0.6);
+}
+
+.text-block.fly-away {
+  animation: flyAway 1s forwards ease-in-out;
+}
+
+@keyframes flyAway {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-200px) scale(1.2) rotate(10deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-1000px) scale(0.8) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Partículas de fondo (fijo en oscuro) */
+#particles {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  background: #0f172a; /* Fondo oscuro fijo */
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .header-title h1 {
+    font-size: 2rem;
+  }
+  
+  .text-block {
+    padding: 30px 40px;
+  }
+  
+  .text-block i {
+    font-size: 2.5rem;
+  }
+}

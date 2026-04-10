@@ -1,0 +1,9 @@
+Proyecto web guía:
+Puede suceder que el mismo css o js ayude a todas las paginas para el diseño u otro pr ende serian css o js principal.
+
+	interfaz.html  TRABAJA para su funcionamiento con particles.js, inscript.js y instyle.css.
+	inicio.html TRABAJA para su funcionamiento con interacciones.js, slider.js y style1.css
+	sobre-mi.html TRABAJA para su funcionamiento con style1.css, style-sobre-mi.css y interacciones.js
+	unidad.html TRABAJA para su funcionamiento con style1.css, slider.js y interacciones.js.
+	login.html TRABAJA para su funcionamiento con style1.css, style-login.css y login.js.
+	admin.html TRABAJA para su funcionamiento con style1.css y admin.js.

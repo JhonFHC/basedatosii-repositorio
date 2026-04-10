@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unidades - Base de Datos II</title>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/style1.css">
+  <link rel="stylesheet" href="css/style-unidad.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- ========== ORDEN CORRECTO DE SCRIPTS ========== -->
+  
+  <!-- 1. PRIMERO: Librería de Supabase (CDN oficial) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  
+  <!-- 2. SEGUNDO: Tu configuración -->
+  <script src="js/supabase-client.js"></script>
+  
+  <!-- 3. TERCERO: Tu lógica -->
+  <script defer src="js/unidad.js"></script>
+  <style>
+    /* ========== NAVBAR CONSISTENTE ========== */
+    nav.navbar {
+      background-color: #1e293b;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      height: 40px;
+      width: auto;
+      filter: drop-shadow(0 0 3px #00ffc3);
+      transition: filter 0.3s ease;
+    }
+
+    .logo-link:hover .logo {
+      filter: drop-shadow(0 0 6px #00cfa3);
+    }
+
+    .nombre-desarrollador-nav {
+      color: #00ffc3;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 8px 16px;
+      border-radius: 5px;
+      background: rgba(0, 255, 195, 0.1);
+      border: 1px solid #00ffc3;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: background 0.3s ease, transform 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .navbar a:hover {
+      background-color: #3b82f6;
+      transform: scale(1.05);
+    }
+
+    .navbar a.clicked {
+      background-color: #3b82f6;
+    }
+
+    /* ========== CONTENEDOR PRINCIPAL ========== */
+    .unidad-main {
+      margin-top: 100px;
+      padding: 20px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 5;
+    }
+
+    .titulo-principal {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .titulo-principal h1 {
+      color: #00ffc3;
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      text-shadow: 0 0 20px rgba(0, 255, 195, 0.4);
+    }
+
+    .titulo-principal p {
+      color: #cbd5e1;
+      font-size: 1.2rem;
+    }
+
+    /* ========== ACORDEÓN DE UNIDADES ========== */
+    .unidades-acordeon {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .unidad-item {
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 15px;
+      border: 1px solid #334155;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .unidad-item:hover {
+      border-color: #00ffc3;
+      box-shadow: 0 5px 20px rgba(0, 255, 195, 0.2);
+    }
+
+    .unidad-header {
+      padding: 25px 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+
+    .unidad-header:hover {
+      background: rgba(0, 255, 195, 0.05);
+    }
+
+    .unidad-icon {
+      font-size: 2.5rem;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 255, 195, 0.1);
+      border-radius: 12px;
+    }
+
+    .unidad-info {
+      flex: 1;
+    }
+
+    .unidad-info h2 {
+      color: #00ffc3;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .unidad-info p {
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+
+    .unidad-toggle {
+      color: #00ffc3;
+      font-size: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .unidad-item.active .unidad-toggle {
+      transform: rotate(180deg);
+    }
+
+    /* ========== CONTENEDOR DE SEMANAS (DESPLEGABLE) ========== */
+    .semanas-container {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease-out;
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .unidad-item.active .semanas-container {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .semanas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .semana-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid #334155;
+      text-decoration: none;
+      color: white;
+      display: block;
+    }
+
+    .semana-card:hover {
+      transform: translateY(-5px);
+      border-color: #00ffc3;
+      box-shadow: 0 10px 25px rgba(0, 255, 195, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .semana-numero {
+      color: #00ffc3;
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .semana-card h3 {
+      color: white;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+
+    .semana-card p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .semana-estado {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .estado-disponible {
+      background: rgba(0, 255, 195, 0.15);
+      color: #00ffc3;
+      border: 1px solid #00ffc3;
+    }
+
+    .estado-proximo {
+      background: rgba(255, 193, 7, 0.15);
+      color: #ffc107;
+      border: 1px solid #ffc107;
+    }
+
+    /* ========== BOTÓN VOLVER ========== */
+    .btn-volver {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 40px;
+      padding: 12px 25px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #00ffc3;
+      text-decoration: none;
+      border-radius: 8px;
+      border: 1px solid #00ffc3;
+      transition: all 0.3s ease;
+    }
+
+    .btn-volver:hover {
+      background: #00ffc3;
+      color: #0f172a;
+      transform: translateX(-5px);
+    }
+
+    /* ========== MENSAJE SIN SEMANAS ========== */
+    .sin-semanas {
+      color: #94a3b8;
+      text-align: center;
+      grid-column: 1 / -1;
+      padding: 20px;
+      font-style: italic;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+      .unidad-main {
+        margin-top: 80px;
+        padding: 15px;
+      }
+      
+      .titulo-principal h1 {
+        font-size: 2rem;
+      }
+      
+      .unidad-header {
+        padding: 20px;
+      }
+      
+      .unidad-info h2 {
+        font-size: 1.3rem;
+      }
+      
+      .unidad-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 2rem;
+      }
+      
+      .semanas-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="interfaz.html" class="logo-link" aria-label="Inicio">
+        <img src="IMG/UPLA.png" alt="Logo Universidad" class="logo" />
+      </a>
+      <div class="nombre-desarrollador-nav">
+        <i class="fas fa-user"></i> Jhon Huaman Cardenas
+      </div>
+    </div>
+
+    <div class="navbar-right">
+      <a href="inicio.html"><i class="fas fa-home"></i> Inicio</a>
+      <a href="sobre-mi.html"><i class="fas fa-user"></i> Sobre mí</a>
+      <a href="unidad.html" class="clicked"><i class="fas fa-database"></i> Unidades</a>
+      <a href="login.html"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- CANVAS PARA PARTÍCULAS -->
+  <canvas id="particles"></canvas>
+  
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="unidad-main">
+    <div class="titulo-principal">
+      <h1><i class="fas fa-database" style="margin-right: 15px;"></i>Base de Datos II</h1>
+      <p>Contenido organizado por unidades y semanas</p>
+    </div>
+
+    <!-- ACORDEÓN DE UNIDADES (Se llena dinámicamente) -->
+    <div id="unidadesContainer" class="unidades-acordeon"></div>
+
+    <!-- BOTÓN VOLVER -->
+    <div style="text-align: center;">
+      <a href="inicio.html" class="btn-volver">
+        <i class="fas fa-arrow-left"></i> Volver al Inicio
+      </a>
+    </div>
+  </main>
+</body>
+</html>

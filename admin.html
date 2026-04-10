@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Base de Datos II</title>
+  
+  <link rel="stylesheet" href="css/style1.css">
+  
+  <!-- ========== SUPABASE INTEGRATION ========== -->
+  <!-- 1. Librería de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  
+  <!-- 2. Tu configuración de Supabase -->
+  <script src="js/supabase-client.js"></script>
+  <!-- ============================================= -->
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Editor WYSIWYG (What You See Is What You Get) -->
+  <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+  <script defer src="js/admin.js"></script>
+  <style>
+    /* ========== VARIABLES Y RESET ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f172a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* ========== NAVBAR ADMIN ========== */
+    .navbar-admin {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border-bottom: 2px solid #00ffc3;
+    }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .admin-logo img {
+      height: 45px;
+      filter: drop-shadow(0 0 10px #00ffc3);
+    }
+
+    .admin-badge-large {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .admin-nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .admin-nav a:hover,
+    .admin-nav a.active {
+      background: rgba(0, 255, 195, 0.15);
+      color: #00ffc3;
+    }
+
+    .btn-logout-admin {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+      border: 1px solid #ff6b6b;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn-logout-admin:hover {
+      background: #ff6b6b;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* ========== LAYOUT PRINCIPAL ========== */
+    .admin-container {
+      display: flex;
+      margin-top: 80px;
+      min-height: calc(100vh - 80px);
+    }
+
+    /* ========== SIDEBAR ========== */
+    .admin-sidebar {
+      width: 280px;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px 20px;
+      position: fixed;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+      border-right: 1px solid #334155;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-item {
+      margin-bottom: 10px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      color: #cbd5e1;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .sidebar-link i {
+      width: 25px;
+      font-size: 1.2rem;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(0, 255, 195, 0.1);
+      color: #00ffc3;
+      transform: translateX(5px);
+    }
+
+    .sidebar-link.active {
+      background: linear-gradient(135deg, #00ffc3, #00cfa3);
+      color: #0f172a;
+      font-weight: bold;
+      box-shadow: 0 5px 20px rgba(0, 255, 195, 0.3);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: #334155;
+      margin: 20px 0;
+    }
+
+    /* ========== CONTENIDO PRINCIPAL ========== */
+    .admin-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 30px;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* ========== PÁGINAS DEL PANEL ========== */
+    .admin-page {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .admin-page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== DASHBOARD STATS ========== */
+    .stats-grid-large {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card-detailed {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card-detailed:hover {
+      transform: translateY(-5px);
+      border-color: #00ffc3;
+      box-shadow: 0 15px 40px rgba(0, 255, 195, 0.2);
+    }
+
+    .stat-icon {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      font-size: 4rem;
+      opacity: 0.1;
+      color: #00ffc3;
+    }
+
+    .stat-value {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #00ffc3;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      color: #cbd5e1;
+      font-size: 1.1rem;
+    }
+
+    .stat-trend {
+      margin-top: 15px;
+      color: #10b981;
+      font-size: 0.9rem;
+    }
+
+    /* ========== TABLAS DE GESTIÓN ========== */
+    .data-table {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 15px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      backdrop-filter: blur(10px);
+    }
+
+    .data-table thead {
+      background: linear-gradient(135deg, #00ffc3, #00cfa3);
+    }
+
+    .data-table th {
+      padding: 18px;
+      text-align: left;
+      color: #0f172a;
+      font-weight: bold;
+    }
+
+    .data-table td {
+      padding: 15px 18px;
+      color: #cbd5e1;
+      border-bottom: 1px solid #334155;
+    }
+
+    .data-table tr:hover {
+      background: rgba(0, 255, 195, 0.05);
+    }
+
+    /* ========== BOTONES DE ACCIÓN ========== */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: #cbd5e1;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .btn-icon:hover {
+      background: rgba(0, 255, 195, 0.2);
+      color: #00ffc3;
+    }
+
+    .btn-icon.delete:hover {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+    }
+
+    /* ========== FORMULARIOS ========== */
+    .form-container {
+      background: rgba(30, 41, 59, 0.9);
+      padding: 35px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      backdrop-filter: blur(10px);
+      max-width: 900px;
+    }
+
+    .form-title {
+      color: #00ffc3;
+      margin-bottom: 30px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    .form-field {
+      margin-bottom: 20px;
+    }
+
+    .form-field.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-field label {
+      display: block;
+      color: #00ffc3;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: #00ffc3;
+      box-shadow: 0 0 20px rgba(0, 255, 195, 0.2);
+    }
+
+    /* Editor WYSIWYG container */
+    .editor-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    /* ========== BOTONES ========== */
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ffc3, #00cfa3);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 255, 195, 0.3);
+    }
+
+    .btn-secondary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #2563eb;
+      transform: translateY(-3px);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    /* ========== MODAL ========== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(30, 41, 59, 0.98);
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      border: 2px solid #00ffc3;
+      backdrop-filter: blur(20px);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .modal-header h3 {
+      color: #00ffc3;
+      font-size: 1.8rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* ========== TOAST ========== */
+    .toast-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 3000;
+    }
+
+    .toast {
+      background: #00ffc3;
+      color: #0f172a;
+      padding: 18px 30px;
+      border-radius: 12px;
+      margin-top: 10px;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(0, 255, 195, 0.3);
+      animation: slideInToast 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .toast.success {
+      background: #10b981;
+      color: white;
+    }
+
+    .toast.error {
+      background: #ef4444;
+      color: white;
+    }
+
+    @keyframes slideInToast {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      .admin-sidebar {
+        width: 80px;
+      }
+      .sidebar-link span {
+        display: none;
+      }
+      .admin-content {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        display: none;
+      }
+      .admin-content {
+        margin-left: 0;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ========== ESTADO VACÍO ========== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    /* ========== BADGES ========== */
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    .badge-info {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <!-- VERIFICACIÓN DE SESIÓN -->
+  <script>
+    if (sessionStorage.getItem('isAdminLogged') !== 'true') {
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <!-- NAVBAR ADMIN -->
+  <nav class="navbar-admin">
+    <div class="admin-logo">
+      <img src="IMG/UPLA.png" alt="UPLA">
+      <span class="admin-badge-large">
+        <i class="fas fa-crown"></i> MODO ADMINISTRADOR
+      </span>
+    </div>
+    <div class="admin-nav">
+      <a href="#" onclick="switchPage('dashboard')" class="active" id="navDashboard">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </a>
+      <a href="#" onclick="switchPage('unidades')" id="navUnidades">
+        <i class="fas fa-layer-group"></i> Unidades
+      </a>
+      <a href="#" onclick="switchPage('semanas')" id="navSemanas">
+        <i class="fas fa-calendar"></i> Semanas
+      </a>
+      <a href="#" onclick="switchPage('archivos')" id="navArchivos">
+        <i class="fas fa-file-pdf"></i> Archivos
+      </a>
+      <button class="btn-logout-admin" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Salir
+      </button>
+    </div>
+  </nav>
+
+  <canvas id="particles"></canvas>
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div class="admin-container">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link active" onclick="switchPage('dashboard')">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" onclick="switchPage('crearSemana')">
+            <i class="fas fa-plus-circle"></i>
+            <span>Crear Semana</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" onclick="switchPage('editarSemana')">
+            <i class="fas fa-edit"></i>
+            <span>Editar Semanas</span>
+          </a>
+        </li>
+        <div class="sidebar-divider"></div>
+        <li class="sidebar-item">
+          <a class="sidebar-link" onclick="switchPage('unidades')">
+            <i class="fas fa-folder"></i>
+            <span>Gestionar Unidades</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" onclick="switchPage('archivos')">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Subir Archivos</span>
+          </a>
+        </li>
+        <div class="sidebar-divider"></div>
+        <li class="sidebar-item">
+          <a class="sidebar-link" onclick="switchPage('configuracion')">
+            <i class="fas fa-cog"></i>
+            <span>Configuración</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="admin-content">
+      <!-- PÁGINA: DASHBOARD -->
+      <div id="page-dashboard" class="admin-page active">
+        <h1 style="color: #00ffc3; margin-bottom: 30px;">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </h1>
+        
+        <div class="stats-grid-large">
+          <div class="stat-card-detailed">
+            <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-value" id="dashUnidades">4</div>
+            <div class="stat-label">Unidades Totales</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> +0 este mes</div>
+          </div>
+          
+          <div class="stat-card-detailed">
+            <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
+            <div class="stat-value" id="dashSemanas">16</div>
+            <div class="stat-label">Semanas Totales</div>
+            <div class="stat-trend"><i class="fas fa-check-circle"></i> 12 disponibles</div>
+          </div>
+          
+          <div class="stat-card-detailed">
+            <div class="stat-icon"><i class="fas fa-file-pdf"></i></div>
+            <div class="stat-value" id="dashPDFs">8</div>
+            <div class="stat-label">Archivos PDF</div>
+            <div class="stat-trend"><i class="fas fa-cloud-upload-alt"></i> 2 esta semana</div>
+          </div>
+          
+          <div class="stat-card-detailed">
+            <div class="stat-icon"><i class="fas fa-eye"></i></div>
+            <div class="stat-value">342</div>
+            <div class="stat-label">Visitas Totales</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> +12% vs mes anterior</div>
+          </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div style="margin-top: 40px;">
+          <h3 style="color: #00ffc3; margin-bottom: 20px;">
+            <i class="fas fa-clock"></i> Actividad Reciente
+          </h3>
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Acción</th>
+                  <th>Elemento</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="actividadReciente">
+                <!-- Se llena con JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PÁGINA: CREAR SEMANA -->
+      <div id="page-crearSemana" class="admin-page">
+        <div class="form-container">
+          <h2 class="form-title">
+            <i class="fas fa-plus-circle"></i> Crear Nueva Semana
+          </h2>
+          
+          <form id="formCrearSemana">
+            <div class="form-grid">
+              <div class="form-field">
+                <label><i class="fas fa-book"></i> Unidad</label>
+                <select id="createUnidad" required>
+                  <option value="">Seleccionar unidad...</option>
+                  <option value="1">Unidad 1: SQL Avanzado y Optimización</option>
+                  <option value="2">Unidad 2: PL/SQL y Programación en BD</option>
+                  <option value="3">Unidad 3: Administración y Seguridad</option>
+                  <option value="4">Unidad 4: NoSQL y Tendencias</option>
+                </select>
+              </div>
+              
+              <div class="form-field">
+                <label><i class="fas fa-hashtag"></i> Número de Semana</label>
+                <input type="number" id="createNumero" min="1" max="16" required>
+              </div>
+              
+              <div class="form-field full-width">
+                <label><i class="fas fa-heading"></i> Título de la Semana</label>
+                <input type="text" id="createTitulo" placeholder="Ej: Subconsultas Correlacionadas y CTEs" required>
+              </div>
+              
+              <div class="form-field full-width">
+                <label><i class="fas fa-pencil-alt"></i> Descripción Informal (El sistema la formateará)</label>
+                <textarea id="createDescripcion" rows="4" placeholder="Escribe libremente lo que viste en clase... Ej: 'hoy el profe explicó subconsultas, son consultas dentro de otras y sirven para optimizar, también vimos EXISTS y NOT EXISTS que son importantes...'"></textarea>
+              </div>
+              
+              <div class="form-field full-width">
+                <label><i class="fas fa-edit"></i> Contenido Detallado (Editor Visual)</label>
+                <div class="editor-container">
+                  <textarea id="createContenido" rows="10"></textarea>
+                </div>
+              </div>
+              
+              <div class="form-field">
+                <label><i class="fas fa-link"></i> Enlace PDF (opcional)</label>
+                <input type="url" id="createPDF" placeholder="https://drive.google.com/...">
+              </div>
+              
+              <div class="form-field">
+                <label><i class="fas fa-video"></i> Enlace Video (opcional)</label>
+                <input type="url" id="createVideo" placeholder="https://youtube.com/...">
+              </div>
+              
+              <div class="form-field">
+                <label><i class="fas fa-tag"></i> Estado</label>
+                <select id="createEstado">
+                  <option value="disponible">Disponible</option>
+                  <option value="proximo">Próximamente</option>
+                  <option value="bloqueado">Bloqueado</option>
+                </select>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+              <button type="button" class="btn btn-primary" onclick="previewSemana()">
+                <i class="fas fa-eye"></i> Vista Previa
+              </button>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Crear Semana
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="generateHTMLCode()">
+                <i class="fas fa-code"></i> Generar Código HTML
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PÁGINA: EDITAR SEMANAS -->
+      <div id="page-editarSemana" class="admin-page">
+        <h2 style="color: #00ffc3; margin-bottom: 25px;">
+          <i class="fas fa-edit"></i> Gestionar Semanas Existentes
+        </h2>
+        
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Unidad</th>
+                <th>Semana</th>
+                <th>Título</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaSemanas">
+              <!-- Se llena con JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PÁGINA: UNIDADES -->
+      <div id="page-unidades" class="admin-page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+          <h2 style="color: #00ffc3;"><i class="fas fa-layer-group"></i> Gestionar Unidades</h2>
+          <button class="btn btn-primary" onclick="abrirModalUnidad()">
+            <i class="fas fa-plus"></i> Nueva Unidad
+          </button>
+        </div>
+        
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Número</th>
+                <th>Título</th>
+                <th>Semanas</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaUnidades">
+              <!-- Se llena con JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PÁGINA: ARCHIVOS -->
+      <div id="page-archivos" class="admin-page">
+        <h2 style="color: #00ffc3; margin-bottom: 25px;">
+          <i class="fas fa-cloud-upload-alt"></i> Gestión de Archivos
+        </h2>
+        
+        <div class="form-container" style="margin-bottom: 30px;">
+          <h3 style="color: #00ffc3; margin-bottom: 20px;">Subir Nuevo Archivo</h3>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label><i class="fas fa-file"></i> Nombre del Archivo</label>
+              <input type="text" id="fileName" placeholder="Ej: Clase 01 - Subconsultas.pdf">
+            </div>
+            <div class="form-field full-width">
+              <label><i class="fas fa-link"></i> Enlace (Google Drive, OneDrive, etc.)</label>
+              <input type="url" id="fileUrl" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="form-field">
+              <label><i class="fas fa-folder"></i> Asociar a Semana</label>
+              <select id="fileSemana">
+                <option value="">Ninguna (General)</option>
+                <!-- Se llena con JS -->
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-success" onclick="guardarArchivo()">
+            <i class="fas fa-save"></i> Guardar Archivo
+          </button>
+        </div>
+        
+        <h3 style="color: #00ffc3; margin-bottom: 20px;">Archivos Subidos</h3>
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Enlace</th>
+                <th>Asociado a</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaArchivos">
+              <!-- Se llena con JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PÁGINA: CONFIGURACIÓN -->
+      <div id="page-configuracion" class="admin-page">
+        <h2 style="color: #00ffc3; margin-bottom: 25px;">
+          <i class="fas fa-cog"></i> Configuración
+        </h2>
+        
+        <div class="form-container">
+          <h3 style="color: #00ffc3; margin-bottom: 20px;">Información del Curso</h3>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label>Nombre del Curso</label>
+              <input type="text" id="configCurso" value="Base de Datos II">
+            </div>
+            <div class="form-field full-width">
+              <label>Profesor</label>
+              <input type="text" id="configProfesor" value="MG. Raul Enrique Fernandez Bejarano">
+            </div>
+            <div class="form-field full-width">
+              <label>Ciclo Académico</label>
+              <input type="text" id="configCiclo" value="2024-II">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="guardarConfiguracion()">
+            <i class="fas fa-save"></i> Guardar Cambios
+          </button>
+        </div>
+        
+        <div class="form-container" style="margin-top: 30px;">
+          <h3 style="color: #00ffc3; margin-bottom: 20px;">Exportar / Importar</h3>
+          <div style="display: flex; gap: 15px;">
+            <button class="btn btn-secondary" onclick="exportarDatos()">
+              <i class="fas fa-download"></i> Exportar Datos (JSON)
+            </button>
+            <button class="btn btn-secondary" onclick="importarDatos()">
+              <i class="fas fa-upload"></i> Importar Datos
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL PARA VISTA PREVIA -->
+  <div id="modalPreview" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-eye"></i> Vista Previa</h3>
+        <button class="modal-close" onclick="closeModal('modalPreview')">&times;</button>
+      </div>
+      <div id="previewContent" style="max-height: 500px; overflow-y: auto;">
+        <!-- Contenido de vista previa -->
+      </div>
+      <div style="margin-top: 20px;">
+        <button class="btn btn-primary" onclick="copyToClipboard()">
+          <i class="fas fa-copy"></i> Copiar Código HTML
+        </button>
+        <button class="btn btn-secondary" onclick="closeModal('modalPreview')">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA GENERAR CÓDIGO -->
+  <div id="modalCode" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-code"></i> Código HTML Generado</h3>
+        <button class="modal-close" onclick="closeModal('modalCode')">&times;</button>
+      </div>
+      <textarea id="generatedCode" style="width: 100%; min-height: 400px; background: #0f172a; color: #00ffc3; padding: 20px; border-radius: 10px; font-family: monospace;"></textarea>
+      <div style="margin-top: 20px; display: flex; gap: 15px;">
+        <button class="btn btn-primary" onclick="copyGeneratedCode()">
+          <i class="fas fa-copy"></i> Copiar al Portapapeles
+        </button>
+        <button class="btn btn-success" onclick="downloadHTML()">
+          <i class="fas fa-download"></i> Descargar HTML
+        </button>
+        <button class="btn btn-secondary" onclick="closeModal('modalCode')">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA NUEVA/EDITAR UNIDAD -->
+  <div id="modalUnidad" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-layer-group"></i> <span id="modalUnidadTitle">Nueva Unidad</span></h3>
+        <button class="modal-close" onclick="closeModal('modalUnidad')">&times;</button>
+      </div>
+      <form id="formUnidad">
+        <input type="hidden" id="unidadId">
+        <div class="form-field">
+          <label>Número de Unidad</label>
+          <input type="number" id="unidadNumero" min="1" required>
+        </div>
+        <div class="form-field">
+          <label>Título</label>
+          <input type="text" id="unidadTitulo" required>
+        </div>
+        <div class="form-field">
+          <label>Descripción</label>
+          <textarea id="unidadDescripcion" rows="3"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Icono (emoji)</label>
+          <input type="text" id="unidadIcono" placeholder="📚" maxlength="2">
+        </div>
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalUnidad')">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/particles.js"></script>
+</body>
+</html>
