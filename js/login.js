@@ -92,38 +92,40 @@ document.addEventListener('DOMContentLoaded', function() {
     loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
       
-      const username = usernameInput.value.trim();
+      const username = usernameInput.value.trim().toLowerCase();
       const password = passwordInput.value;
       
-      // Credenciales para el profesor
-      if (username === 'admin' && password === 'basedatos2024') {
-        // Guardar sesión en sessionStorage
+      // Validar que sea correo institucional
+      if (!username.endsWith('@ms.upla.edu.pe')) {
+        errorEl.style.color = '#ff6b6b';
+        errorEl.textContent = '❌ Debes usar tu correo institucional (@ms.upla.edu.pe)';
+        passwordInput.value = '';
+        return;
+      }
+      
+      // Extraer nombre de usuario (sin dominio)
+      const user = username.replace('@ms.upla.edu.pe', '');
+      
+      // Credenciales válidas: admin o profesor
+      if ((user === 'admin' || user === 'jhuaman' || user === 'rfernandez') && password === 'basedatos2024') {
         sessionStorage.setItem('isAdminLogged', 'true');
-        sessionStorage.setItem('adminName', 'Jhon Huaman Cardenas');
+        sessionStorage.setItem('adminName', user === 'admin' ? 'Administrador' : (user === 'jhuaman' ? 'Jhon Huaman Cardenas' : 'Raul Fernandez'));
         sessionStorage.setItem('loginTime', new Date().toISOString());
         
-        // Mostrar mensaje de éxito
         errorEl.style.color = '#00ffc3';
         errorEl.textContent = '✓ Acceso correcto. Redirigiendo...';
         
-        // Redirigir al panel de administración
         setTimeout(() => {
           window.location.href = 'admin.html';
         }, 1000);
-        
       } else {
-        // Error de credenciales
         errorEl.style.color = '#ff6b6b';
         errorEl.textContent = '❌ Usuario o contraseña incorrectos';
         
-        // Añadir efecto shake al formulario
         const loginContainer = document.querySelector('.login-container');
         loginContainer.classList.add('shake');
-        setTimeout(() => {
-          loginContainer.classList.remove('shake');
-        }, 500);
+        setTimeout(() => loginContainer.classList.remove('shake'), 500);
         
-        // Limpiar campo de contraseña
         passwordInput.value = '';
         passwordInput.focus();
       }
@@ -151,6 +153,20 @@ document.addEventListener('DOMContentLoaded', function() {
       loginContainer.style.transform = 'translateY(0)';
     }, 100);
   }
+
+  // ========== 6. ESTILO SHAKE PARA ERROR ==========
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+  `;
+  document.head.appendChild(style);
 
   console.log('✅ login.js cargado correctamente');
 });

@@ -1,7 +1,6 @@
 // admin.js - Panel de Administración CONECTADO A SUPABASE
 
 // ========== DATOS EN MEMORIA (Caché local) ==========
-// ⚠️ DECLARACIÓN ÚNICA - SOLO UNA VEZ
 let appData = {
   unidades: [],
   semanas: [],
@@ -13,24 +12,17 @@ let appData = {
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('🚀 Panel de Administración iniciado');
   
-  // Verificar sesión
   if (sessionStorage.getItem('isAdminLogged') !== 'true') {
     window.location.href = 'login.html';
     return;
   }
 
-  // Mostrar nombre del admin
   const adminName = sessionStorage.getItem('adminName') || 'Administrador';
   const welcomeElement = document.getElementById('welcomeName');
   if (welcomeElement) welcomeElement.textContent = adminName;
   
-  // Esperar a que Supabase esté listo
   await esperarSupabase();
-  
-  // Cargar datos desde Supabase
   await cargarDatosDesdeSupabase();
-  
-  // Inicializar selects
   cargarSelectUnidades();
   
   console.log('✅ Panel listo');
@@ -54,7 +46,6 @@ async function cargarDatosDesdeSupabase() {
   try {
     console.log('📡 Cargando datos desde Supabase...');
     
-    // Cargar unidades
     const { data: unidades, error: errorU } = await supabase
       .from('unidades')
       .select('*')
@@ -64,7 +55,6 @@ async function cargarDatosDesdeSupabase() {
     appData.unidades = unidades || [];
     console.log('✅ Unidades cargadas:', appData.unidades.length);
     
-    // Cargar semanas
     const { data: semanas, error: errorS } = await supabase
       .from('semanas')
       .select('*')
@@ -74,7 +64,6 @@ async function cargarDatosDesdeSupabase() {
     appData.semanas = semanas || [];
     console.log('✅ Semanas cargadas:', appData.semanas.length);
     
-    // Cargar archivos
     const { data: archivos, error: errorA } = await supabase
       .from('archivos')
       .select('*')
@@ -84,7 +73,6 @@ async function cargarDatosDesdeSupabase() {
     appData.archivos = archivos || [];
     console.log('✅ Archivos cargados:', appData.archivos.length);
     
-    // Cargar actividad
     const { data: actividad, error: errorAct } = await supabase
       .from('actividad')
       .select('*')
@@ -95,7 +83,6 @@ async function cargarDatosDesdeSupabase() {
       appData.actividad = actividad || [];
     }
     
-    // Actualizar todas las vistas
     cargarDashboard();
     cargarTablaSemanas();
     cargarTablaUnidades();
@@ -112,28 +99,63 @@ async function cargarDatosDesdeSupabase() {
 function switchPage(pageName) {
   console.log('🔄 Cambiando a:', pageName);
   
+  const pageMap = {
+    'dashboard': 'dashboard',
+    'unidades': 'unidades',
+    'semanas': 'editarSemana',
+    'archivos': 'archivos',
+    'crearSemana': 'crearSemana',
+    'editarSemana': 'editarSemana',
+    'configuracion': 'configuracion'
+  };
+  
+  const targetPageName = pageMap[pageName] || pageName;
+  
   document.querySelectorAll('.admin-page').forEach(page => {
     page.classList.remove('active');
   });
   
-  const targetPage = document.getElementById(`page-${pageName}`);
+  const targetPage = document.getElementById(`page-${targetPageName}`);
   if (targetPage) {
     targetPage.classList.add('active');
+  } else {
+    console.warn('⚠️ Página no encontrada:', `page-${targetPageName}`);
   }
   
-  // Actualizar sidebar
   document.querySelectorAll('.sidebar-link').forEach(link => {
     link.classList.remove('active');
+  });
+  
+  document.querySelectorAll('.sidebar-link').forEach(link => {
     const span = link.querySelector('span');
     if (span) {
       const text = span.textContent.toLowerCase();
-      if (text.includes(pageName.toLowerCase()) || 
+      if ((pageName === 'semanas' && text.includes('editar')) ||
           (pageName === 'crearSemana' && text.includes('crear')) ||
-          (pageName === 'editarSemana' && text.includes('editar'))) {
+          (pageName === 'unidades' && text.includes('unidades')) ||
+          (pageName === 'archivos' && text.includes('archivos')) ||
+          (pageName === 'configuracion' && text.includes('config')) ||
+          text.includes(pageName.toLowerCase())) {
         link.classList.add('active');
       }
     }
   });
+  
+  document.querySelectorAll('.admin-nav a').forEach(link => {
+    link.classList.remove('active');
+    const text = link.textContent.toLowerCase();
+    if (text.includes(pageName.toLowerCase()) || 
+        (pageName === 'semanas' && text.includes('semanas')) ||
+        (pageName === 'crearSemana' && text.includes('dashboard')) ||
+        (pageName === 'editarSemana' && text.includes('semanas'))) {
+      link.classList.add('active');
+    }
+  });
+  
+  if (pageName === 'dashboard') {
+    const navDashboard = document.getElementById('navDashboard');
+    if (navDashboard) navDashboard.classList.add('active');
+  }
 }
 
 // ========== DASHBOARD ==========
@@ -235,9 +257,10 @@ function cargarTablaArchivos() {
   
   const html = appData.archivos.map(archivo => {
     const semana = appData.semanas.find(s => s.id === archivo.semana_id);
+    const iconoTipo = archivo.tipo === 'local' ? '💾' : '🔗';
     return `
       <tr>
-        <td>${archivo.nombre}</td>
+        <td>${iconoTipo} ${archivo.nombre}</td>
         <td><a href="${archivo.url}" target="_blank" style="color: #00ffc3;">Ver archivo</a></td>
         <td>${semana ? `Semana ${semana.numero}` : 'General'}</td>
         <td>
@@ -250,13 +273,18 @@ function cargarTablaArchivos() {
   tbody.innerHTML = html || '<tr><td colspan="4" class="empty-state">No hay archivos</td></tr>';
 }
 
-// ========== CREAR SEMANA (SUPABASE) ==========
+// ========== CREAR / ACTUALIZAR SEMANA ==========
 document.getElementById('formCrearSemana')?.addEventListener('submit', async function(e) {
   e.preventDefault();
   
   const submitBtn = this.querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+  const editingId = this.dataset.editingId;
+  
+  if (!submitBtn.dataset.originalText) {
+    submitBtn.dataset.originalText = submitBtn.innerHTML;
+  }
+  
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (editingId ? 'Actualizando...' : 'Guardando...');
   submitBtn.disabled = true;
   
   try {
@@ -271,54 +299,59 @@ document.getElementById('formCrearSemana')?.addEventListener('submit', async fun
       estado: document.getElementById('createEstado').value
     };
     
-    const editingId = this.dataset.editingId;
-    
     let result;
     if (editingId) {
-      // Actualizar existente
       result = await supabase
         .from('semanas')
         .update(nuevaSemana)
         .eq('id', editingId)
         .select();
       
-      delete this.dataset.editingId;
-      showToast('✅ Semana actualizada', 'success');
+      showToast('✅ Semana actualizada correctamente', 'success');
     } else {
-      // Crear nueva
       result = await supabase
         .from('semanas')
         .insert([nuevaSemana])
         .select();
       
-      // Registrar actividad
       await supabase.from('actividad').insert([{
         accion: 'Creación',
         elemento: `Semana ${nuevaSemana.numero}: ${nuevaSemana.titulo}`,
         usuario: sessionStorage.getItem('adminName') || 'Admin'
       }]);
       
-      showToast('✅ Semana creada', 'success');
+      showToast('✅ Semana creada correctamente', 'success');
     }
     
     if (result.error) throw result.error;
     
-    // Recargar datos
     await cargarDatosDesdeSupabase();
     
     this.reset();
-    submitBtn.innerHTML = originalText;
+    
+    const htmlPaste = document.getElementById('createHTMLPaste');
+    if (htmlPaste) htmlPaste.value = '';
+    
+    submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Semana';
     submitBtn.disabled = false;
+    delete submitBtn.dataset.originalText;
+    delete this.dataset.editingId;
+    
+    cargarSelectUnidades();
     
   } catch (error) {
     console.error('❌ Error:', error);
     showToast('Error: ' + error.message, 'error');
-    submitBtn.innerHTML = originalText;
+    
+    submitBtn.innerHTML = editingId ? 
+      '<i class="fas fa-save"></i> Actualizar Semana' : 
+      '<i class="fas fa-save"></i> Crear Semana';
     submitBtn.disabled = false;
+    delete submitBtn.dataset.originalText;
   }
 });
 
-// ========== ELIMINAR SEMANA (SUPABASE) ==========
+// ========== ELIMINAR SEMANA ==========
 async function eliminarSemana(id) {
   if (!confirm('¿Eliminar esta semana permanentemente?')) return;
   
@@ -332,7 +365,6 @@ async function eliminarSemana(id) {
     
     if (error) throw error;
     
-    // Registrar actividad
     await supabase.from('actividad').insert([{
       accion: 'Eliminación',
       elemento: `Semana ${semana?.numero}: ${semana?.titulo}`,
@@ -348,15 +380,13 @@ async function eliminarSemana(id) {
   }
 }
 
-// ========== ELIMINAR UNIDAD (SUPABASE) ==========
+// ========== ELIMINAR UNIDAD ==========
 async function eliminarUnidad(id) {
   if (!confirm('¿Eliminar esta unidad y TODAS sus semanas?')) return;
   
   try {
-    // Primero eliminar semanas asociadas
     await supabase.from('semanas').delete().eq('unidad_id', id);
     
-    // Luego eliminar unidad
     const { error } = await supabase
       .from('unidades')
       .delete()
@@ -374,7 +404,7 @@ async function eliminarUnidad(id) {
   }
 }
 
-// ========== ELIMINAR ARCHIVO (SUPABASE) ==========
+// ========== ELIMINAR ARCHIVO ==========
 async function eliminarArchivo(id) {
   if (!confirm('¿Eliminar este archivo?')) return;
   
@@ -414,11 +444,16 @@ function editarSemana(id) {
   document.getElementById('createVideo').value = semana.video_url || '';
   document.getElementById('createEstado').value = semana.estado;
   
+  const htmlPaste = document.getElementById('createHTMLPaste');
+  if (htmlPaste) htmlPaste.value = '';
+  
   const form = document.getElementById('formCrearSemana');
   form.dataset.editingId = id;
   
-  const submitBtn = form.querySelector('.btn-success');
-  submitBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar Semana';
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar Semana';
+  }
   
   showToast('✏️ Editando: ' + semana.titulo, 'success');
 }
@@ -431,7 +466,6 @@ function editarUnidad(id) {
     return;
   }
   
-  // Abrir modal de unidad
   document.getElementById('modalUnidadTitle').textContent = 'Editar Unidad';
   document.getElementById('unidadId').value = unidad.id;
   document.getElementById('unidadNumero').value = unidad.numero;
@@ -450,11 +484,18 @@ function abrirModalUnidad() {
   openModal('modalUnidad');
 }
 
-// ========== GUARDAR UNIDAD (SUPABASE) ==========
+// ========== GUARDAR UNIDAD (CON LÍMITE DE 4) ==========
 document.getElementById('formUnidad')?.addEventListener('submit', async function(e) {
   e.preventDefault();
   
   const id = document.getElementById('unidadId').value;
+  
+  // Si es nueva y ya hay 4 unidades, no permitir
+  if (!id && appData.unidades.length >= 4) {
+    showToast('⚠️ Solo se permiten 4 unidades. Edita las existentes.', 'error');
+    return;
+  }
+  
   const unidadData = {
     numero: parseInt(document.getElementById('unidadNumero').value),
     titulo: document.getElementById('unidadTitulo').value,
@@ -484,15 +525,37 @@ document.getElementById('formUnidad')?.addEventListener('submit', async function
   }
 });
 
-// ========== GUARDAR ARCHIVO (SUPABASE) ==========
+// ========== GUARDAR ARCHIVO (CON SUBIDA LOCAL) ==========
 async function guardarArchivo() {
-  const nombre = document.getElementById('fileName')?.value;
-  const url = document.getElementById('fileUrl')?.value;
+  let nombre = document.getElementById('fileName')?.value;
+  let url = document.getElementById('fileUrl')?.value;
   const semanaId = document.getElementById('fileSemana')?.value;
+  const localFile = document.getElementById('localFile')?.files[0];
   
-  if (!nombre || !url) {
-    showToast('❌ Completa todos los campos', 'error');
+  let finalUrl = url;
+  
+  // Si hay archivo local, "simular" subida
+  if (localFile) {
+    finalUrl = `almacenado/${localFile.name}`;
+    
+    if (!nombre) {
+      nombre = localFile.name;
+      document.getElementById('fileName').value = localFile.name;
+    }
+  }
+  
+  if (!nombre) {
+    showToast('❌ El nombre del archivo es obligatorio', 'error');
     return;
+  }
+  
+  if (!finalUrl && !localFile) {
+    showToast('❌ Debes proporcionar un enlace o subir un archivo', 'error');
+    return;
+  }
+  
+  if (!finalUrl && localFile) {
+    finalUrl = `almacenado/${localFile.name}`;
   }
   
   try {
@@ -500,18 +563,26 @@ async function guardarArchivo() {
       .from('archivos')
       .insert([{
         nombre: nombre,
-        url: url,
-        semana_id: semanaId || null
+        url: finalUrl,
+        semana_id: semanaId || null,
+        tipo: localFile ? 'local' : 'enlace'
       }]);
     
     if (error) throw error;
+    
+    await supabase.from('actividad').insert([{
+      accion: 'Subida',
+      elemento: `Archivo: ${nombre}`,
+      usuario: sessionStorage.getItem('adminName') || 'Admin'
+    }]);
     
     await cargarDatosDesdeSupabase();
     
     document.getElementById('fileName').value = '';
     document.getElementById('fileUrl').value = '';
+    document.getElementById('localFile').value = '';
     
-    showToast('✅ Archivo guardado', 'success');
+    showToast('✅ Archivo guardado correctamente', 'success');
     
   } catch (error) {
     console.error('❌ Error:', error);
@@ -532,7 +603,6 @@ document.getElementById('importFile')?.addEventListener('change', async function
     const text = await file.text();
     const data = JSON.parse(text);
     
-    // Aquí puedes implementar la importación a Supabase
     showToast('✅ Función en desarrollo', 'success');
     
   } catch (error) {
@@ -638,24 +708,6 @@ function downloadHTML() {
   showToast('✅ HTML descargado', 'success');
 }
 
-// ========== VISTA PREVIA ==========
-function previewSemana() {
-  const titulo = document.getElementById('createTitulo').value;
-  const descripcion = document.getElementById('createDescripcion').value;
-  const contenido = document.getElementById('createContenido').value;
-  
-  const previewHTML = `
-    <h2 style="color: #00ffc3;">${titulo}</h2>
-    <h4>Descripción</h4>
-    <p>${descripcion}</p>
-    <h4>Contenido</h4>
-    ${contenido || '<p>En desarrollo...</p>'}
-  `;
-  
-  document.getElementById('previewContent').innerHTML = previewHTML;
-  openModal('modalPreview');
-}
-
 // ========== EXPORTAR DATOS ==========
 function exportarDatos() {
   const dataStr = JSON.stringify(appData, null, 2);
@@ -676,6 +728,151 @@ function guardarConfiguracion() {
   
   localStorage.setItem('configCurso', JSON.stringify({ curso, profesor, ciclo }));
   showToast('✅ Configuración guardada', 'success');
+}
+
+// ========== APLICAR HTML PEGADO ==========
+function aplicarHTMLPegado() {
+  const htmlCode = document.getElementById('createHTMLPaste').value;
+  if (!htmlCode || htmlCode.trim() === '') {
+    showToast('❌ Pega un código HTML primero', 'error');
+    return;
+  }
+  
+  try {
+    const titleMatch = htmlCode.match(/<h1[^>]*>([^<]+)<\/h1>/) || htmlCode.match(/<title>([^<]+)<\/title>/);
+    if (titleMatch && titleMatch[1]) {
+      const titulo = titleMatch[1].trim();
+      document.getElementById('createTitulo').value = titulo;
+      
+      const semanaMatch = titulo.match(/Semana\s*(\d+)/i);
+      if (semanaMatch) {
+        document.getElementById('createNumero').value = parseInt(semanaMatch[1]);
+      }
+    }
+    
+    const paragraphs = htmlCode.match(/<p[^>]*>([^<]+)<\/p>/g);
+    if (paragraphs) {
+      for (let p of paragraphs) {
+        const content = p.replace(/<[^>]+>/g, '').trim();
+        if (content.length > 20) {
+          document.getElementById('createDescripcion').value = content;
+          break;
+        }
+      }
+    }
+    
+    const pdfMatch = htmlCode.match(/href=["']([^"']*\.pdf[^"']*)["']/i) || 
+                     htmlCode.match(/drive\.google\.com[^"'\s]*/i) ||
+                     htmlCode.match(/href=["']([^"']*download[^"']*)["']/i);
+    if (pdfMatch) {
+      const pdfUrl = pdfMatch[1] || pdfMatch[0];
+      document.getElementById('createPDF').value = pdfUrl.startsWith('http') ? pdfUrl : 'https://' + pdfUrl;
+    }
+    
+    const videoMatch = htmlCode.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/i) ||
+                       htmlCode.match(/href=["']([^"']*(?:youtube|youtu\.be)[^"']*)["']/i);
+    if (videoMatch) {
+      const videoUrl = videoMatch[1] || videoMatch[0];
+      document.getElementById('createVideo').value = videoUrl.startsWith('http') ? videoUrl : 'https://' + videoUrl;
+    }
+    
+    if (htmlCode.includes('disponible') || htmlCode.includes('badge-success')) {
+      document.getElementById('createEstado').value = 'disponible';
+    } else if (htmlCode.includes('proximo') || htmlCode.includes('badge-warning')) {
+      document.getElementById('createEstado').value = 'proximo';
+    }
+    
+    document.getElementById('createContenido').value = htmlCode;
+    
+    if (typeof ClassicEditor !== 'undefined') {
+      const editorElement = document.querySelector('#createContenido');
+      if (editorElement && editorElement.ckeditorInstance) {
+        editorElement.ckeditorInstance.setData(htmlCode);
+      }
+    }
+    
+    showToast('✅ HTML aplicado correctamente', 'success');
+    
+  } catch (error) {
+    console.error('Error al procesar HTML:', error);
+    showToast('❌ Error al procesar el HTML', 'error');
+  }
+}
+
+// ========== LIMPIAR HTML PEGADO ==========
+function limpiarHTMLPegado() {
+  document.getElementById('createHTMLPaste').value = '';
+  showToast('🧹 Campo HTML limpiado', 'success');
+}
+
+// ========== VISTA PREVIA MEJORADA ==========
+function previewSemana() {
+  const titulo = document.getElementById('createTitulo').value || 'Sin título';
+  const numero = document.getElementById('createNumero').value || '?';
+  const descripcion = document.getElementById('createDescripcion').value || 'Sin descripción';
+  const contenido = document.getElementById('createContenido').value || '<p>Contenido en desarrollo...</p>';
+  const pdfUrl = document.getElementById('createPDF').value;
+  const videoUrl = document.getElementById('createVideo').value;
+  const estado = document.getElementById('createEstado').value;
+  const unidadSelect = document.getElementById('createUnidad');
+  const unidad = unidadSelect?.options[unidadSelect.selectedIndex]?.text || 'Sin unidad';
+  
+  const estadoBadge = {
+    'disponible': '<span class="badge badge-success">Disponible</span>',
+    'proximo': '<span class="badge badge-warning">Próximamente</span>',
+    'bloqueado': '<span class="badge badge-info">Bloqueado</span>'
+  }[estado] || '';
+  
+  const previewHTML = `
+    <div style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span class="badge badge-info">Semana ${numero}</span>
+        ${estadoBadge}
+      </div>
+      <h2 style="color: #00ffc3; margin-bottom: 10px;">${titulo}</h2>
+      <p style="color: #94a3b8; margin-bottom: 20px;"><strong>Unidad:</strong> ${unidad}</p>
+      
+      <div style="background: rgba(0,255,195,0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h4 style="color: #00ffc3; margin-bottom: 10px;">📝 Descripción</h4>
+        <p style="color: #cbd5e1; line-height: 1.6;">${descripcion}</p>
+      </div>
+      
+      <div style="background: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h4 style="color: #00ffc3; margin-bottom: 10px;">📚 Contenido</h4>
+        <div style="color: white; line-height: 1.6;">${contenido}</div>
+      </div>
+      
+      ${pdfUrl ? `
+      <div style="margin-bottom: 15px;">
+        <a href="${pdfUrl}" target="_blank" style="color: #00ffc3; text-decoration: none;">
+          <i class="fas fa-file-pdf"></i> Ver PDF
+        </a>
+      </div>
+      ` : ''}
+      
+      ${videoUrl ? `
+      <div style="margin-bottom: 15px;">
+        <a href="${videoUrl}" target="_blank" style="color: #00ffc3; text-decoration: none;">
+          <i class="fas fa-video"></i> Ver Video
+        </a>
+      </div>
+      ` : ''}
+    </div>
+  `;
+  
+  document.getElementById('previewContent').innerHTML = previewHTML;
+  openModal('modalPreview');
+}
+
+// ========== USAR ESTE CONTENIDO PARA CREAR ==========
+function usarContenidoParaCrear() {
+  closeModal('modalPreview');
+  showToast('✅ Contenido listo. Haz clic en "Crear Semana" para guardar', 'success');
+  
+  document.querySelector('#formCrearSemana .btn-success')?.scrollIntoView({ 
+    behavior: 'smooth', 
+    block: 'center' 
+  });
 }
 
 console.log('✅ Admin.js (Supabase) cargado correctamente');

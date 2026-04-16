@@ -12,6 +12,15 @@ class PortalManager {
     
     this.setupEventListeners();
     this.setupKeyboardNavigation();
+    // Restaurar visibilidad al cargar la página (para botón "atrás")
+    this.restoreVisibility();
+  }
+
+  restoreVisibility() {
+    // Asegurar que el portal sea visible siempre
+    this.portal.classList.remove('fly-away');
+    this.portal.style.opacity = '1';
+    this.portal.style.transform = 'none';
   }
 
   setupEventListeners() {
@@ -45,3 +54,13 @@ if (document.readyState === 'loading') {
 } else {
   new PortalManager();
 }
+
+// Restaurar al volver atrás (pageshow se ejecuta incluso con bfcache)
+window.addEventListener('pageshow', () => {
+  const portal = document.getElementById('portal');
+  if (portal) {
+    portal.classList.remove('fly-away');
+    portal.style.opacity = '1';
+    portal.style.transform = 'none';
+  }
+});
