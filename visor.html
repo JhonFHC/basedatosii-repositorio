@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor de Archivos - Base de Datos II</title>
+  
+  <!-- Estilos consistentes con el proyecto -->
+  <link rel="stylesheet" href="css/style1.css">
+  <link rel="stylesheet" href="css/style-unidad.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f172a;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Navbar consistente con el proyecto */
+    nav.navbar {
+      background-color: #1e293b;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      height: 40px;
+      filter: drop-shadow(0 0 3px #00ffc3);
+    }
+
+    .nombre-desarrollador-nav {
+      color: #00ffc3;
+      font-weight: bold;
+      padding: 8px 16px;
+      background: rgba(0, 255, 195, 0.1);
+      border-radius: 5px;
+      border: 1px solid #00ffc3;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .navbar a:hover {
+      background-color: #3b82f6;
+    }
+
+    /* Layout principal */
+    .visor-container {
+      display: flex;
+      margin-top: 70px;
+      height: calc(100vh - 70px);
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Panel lateral - Lista de archivos */
+    .files-sidebar {
+      width: 320px;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 25px 20px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .sidebar-header h3 {
+      color: #00ffc3;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .upload-area {
+      border: 2px dashed #00ffc3;
+      border-radius: 12px;
+      padding: 25px 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(0, 255, 195, 0.03);
+    }
+
+    .upload-area:hover {
+      background: rgba(0, 255, 195, 0.08);
+      border-style: solid;
+    }
+
+    .upload-area i {
+      font-size: 2.5rem;
+      color: #00ffc3;
+      margin-bottom: 10px;
+    }
+
+    .upload-area p {
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
+
+    .upload-area small {
+      color: #64748b;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .files-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .file-item {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 1px solid #334155;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-item:hover {
+      background: rgba(0, 255, 195, 0.08);
+      border-color: #00ffc3;
+    }
+
+    .file-item.active {
+      background: rgba(0, 255, 195, 0.12);
+      border-color: #00ffc3;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 255, 195, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #00ffc3;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-name {
+      color: white;
+      font-weight: 500;
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .file-meta {
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+
+    .file-delete {
+      color: #ef4444;
+      cursor: pointer;
+      padding: 5px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .file-item:hover .file-delete {
+      opacity: 1;
+    }
+
+    /* Panel principal - Visor */
+    .viewer-main {
+      flex: 1;
+      background: #0a0f1a;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .viewer-toolbar {
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .toolbar-btn {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-btn:hover {
+      background: #00ffc3;
+      color: #0f172a;
+      border-color: #00ffc3;
+    }
+
+    .toolbar-btn i {
+      font-size: 1rem;
+    }
+
+    .zoom-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .viewer-content {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: #0a0f1a;
+    }
+
+    /* Estilo cuaderno */
+    .notebook-viewer {
+      background: #1a1f2e;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 255, 195, 0.1);
+      padding: 30px;
+      max-width: 100%;
+      max-height: 100%;
+      position: relative;
+    }
+
+    .notebook-viewer::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      background: linear-gradient(to right, rgba(0, 255, 195, 0.05), transparent);
+      border-right: 1px solid rgba(0, 255, 195, 0.1);
+    }
+
+    #pdfCanvas, #imageViewer {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 5rem;
+      color: #334155;
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      color: #00ffc3;
+      margin: 20px 0 10px;
+    }
+
+    .page-indicator {
+      color: #cbd5e1;
+      margin: 0 10px;
+    }
+
+    .file-info-header {
+      margin-left: 20px;
+      color: #00ffc3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .file-info-header i {
+      font-size: 1.2rem;
+    }
+
+    .btn-volver {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 15px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #00ffc3;
+      text-decoration: none;
+      border-radius: 8px;
+      border: 1px solid #00ffc3;
+      transition: all 0.3s ease;
+    }
+
+    .btn-volver:hover {
+      background: #00ffc3;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar consistente -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="index.html" class="logo-link">
+        <img src="IMG/UPLA.png" alt="Logo" class="logo" />
+      </a>
+      <div class="nombre-desarrollador-nav">
+        <i class="fas fa-user"></i> Jhon Huaman Cardenas
+      </div>
+    </div>
+    <div class="navbar-right">
+      <a href="inicio.html"><i class="fas fa-home"></i> Inicio</a>
+      <a href="sobre-mi.html"><i class="fas fa-user"></i> Sobre mí</a>
+      <a href="unidad.html"><i class="fas fa-database"></i> Unidades</a>
+      <a href="login.html"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- Canvas para partículas -->
+  <canvas id="particles"></canvas>
+
+  <div class="visor-container">
+    <!-- Panel lateral -->
+    <div class="files-sidebar">
+      <div class="sidebar-header">
+        <h3><i class="fas fa-folder-open"></i> Mis Archivos</h3>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Click para subir archivos</p>
+          <small>PDF, Word, Excel, Imágenes</small>
+        </div>
+        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+      </div>
+      <div class="files-list" id="filesList">
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p>No hay archivos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel principal - Visor -->
+    <div class="viewer-main">
+      <div class="viewer-toolbar">
+        <a href="unidad.html" class="btn-volver">
+          <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        
+        <div class="file-info-header" id="fileInfoHeader">
+          <i class="fas fa-file"></i>
+          <span id="currentFileName">Ningún archivo seleccionado</span>
+        </div>
+        
+        <button class="toolbar-btn" onclick="rotateLeft()">
+          <i class="fas fa-undo-alt"></i> Girar Izquierda
+        </button>
+        <button class="toolbar-btn" onclick="rotateRight()">
+          <i class="fas fa-redo-alt"></i> Girar Derecha
+        </button>
+        <button class="toolbar-btn" onclick="downloadCurrentFile()">
+          <i class="fas fa-download"></i> Descargar
+        </button>
+        
+        <div class="zoom-control">
+          <button class="toolbar-btn" onclick="zoomOut()">
+            <i class="fas fa-search-minus"></i>
+          </button>
+          <span class="page-indicator" id="zoomLevel">100%</span>
+          <button class="toolbar-btn" onclick="zoomIn()">
+            <i class="fas fa-search-plus"></i>
+          </button>
+        </div>
+        
+        <div style="display: flex; gap: 10px;" id="pageControls">
+          <button class="toolbar-btn" onclick="previousPage()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="page-indicator" id="pageIndicator">-</span>
+          <button class="toolbar-btn" onclick="nextPage()">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="viewer-content" id="viewerContent">
+        <div class="notebook-viewer">
+          <div class="empty-state">
+            <i class="fas fa-book-open"></i>
+            <h3>Visor de Archivos</h3>
+            <p>Selecciona un archivo para visualizarlo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/particles.js"></script>
+  <script>
+    // Configuración de PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    
+    let currentPDF = null;
+    let currentPage = 1;
+    let totalPages = 0;
+    let currentZoom = 1.0;
+    let currentRotation = 0;
+    let currentFile = null;
+    let files = [];
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', async function() {
+      await esperarSupabase();
+      await cargarArchivos();
+      
+      // Configurar upload
+      document.getElementById('fileInput').addEventListener('change', subirArchivos);
+      
+      // VERIFICAR SI VIENE UN ARCHIVO POR URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileParam = urlParams.get('file');
+      const fileName = urlParams.get('name');
+      
+      if (fileParam) {
+        // Decodificar URL
+        const fileUrl = decodeURIComponent(fileParam);
+        const decodedName = fileName ? decodeURIComponent(fileName) : 'Archivo';
+        
+        // Cargar automáticamente
+        setTimeout(() => {
+          cargarArchivoDesdeURL(fileUrl, decodedName);
+        }, 500);
+      }
+    });
+    
+    async function esperarSupabase() {
+      for (let i = 0; i < 15; i++) {
+        if (typeof supabase !== 'undefined' && supabase) return true;
+        await new Promise(r => setTimeout(r, 500));
+      }
+      throw new Error('Supabase no disponible');
+    }
+    
+    async function cargarArchivos() {
+      try {
+        const { data, error } = await supabase
+          .storage
+          .from('archivos')
+          .list();
+        
+        if (error) throw error;
+        
+        files = data || [];
+        renderizarListaArchivos();
+      } catch (error) {
+        console.error('Error cargando archivos:', error);
+      }
+    }
+    
+    function renderizarListaArchivos() {
+      const container = document.getElementById('filesList');
+      
+      if (files.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No hay archivos</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = files.map(file => `
+        <div class="file-item" onclick="cargarArchivo('${file.name}')">
+          <div class="file-icon">
+            <i class="fas ${getFileIcon(file.name)}"></i>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-meta">${formatBytes(file.metadata?.size || 0)}</div>
+          </div>
+          <div class="file-delete" onclick="event.stopPropagation(); eliminarArchivo('${file.name}')">
+            <i class="fas fa-trash"></i>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (ext === 'pdf') return 'fa-file-pdf';
+      if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+      if (['doc', 'docx'].includes(ext)) return 'fa-file-word';
+      if (['xls', 'xlsx'].includes(ext)) return 'fa-file-excel';
+      return 'fa-file';
+    }
+    
+    function formatBytes(bytes) {
+      if (!bytes) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    async function subirArchivos(event) {
+      const files = event.target.files;
+      
+      for (const file of files) {
+        try {
+          const { error } = await supabase
+            .storage
+            .from('archivos')
+            .upload(file.name, file);
+          
+          if (error) throw error;
+          
+          showToast(`✅ ${file.name} subido`, 'success');
+        } catch (error) {
+          showToast(`❌ Error: ${error.message}`, 'error');
+        }
+      }
+      
+      await cargarArchivos();
+      event.target.value = '';
+    }
+    
+    async function cargarArchivo(filename) {
+      try {
+        const { data } = supabase
+          .storage
+          .from('archivos')
+          .getPublicUrl(filename);
+        
+        await cargarArchivoDesdeURL(data.publicUrl, filename);
+        
+        // Marcar como activo en la lista
+        document.querySelectorAll('.file-item').forEach(item => {
+          item.classList.remove('active');
+          if (item.querySelector('.file-name').textContent === filename) {
+            item.classList.add('active');
+          }
+        });
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    async function cargarArchivoDesdeURL(url, filename) {
+      try {
+        currentFile = { name: filename, url: url };
+        document.getElementById('currentFileName').textContent = filename;
+        
+        const ext = filename.split('.').pop().toLowerCase();
+        
+        if (ext === 'pdf') {
+          document.getElementById('pageControls').style.display = 'flex';
+          await renderizarPDF(url);
+        } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+          document.getElementById('pageControls').style.display = 'none';
+          renderizarImagen(url);
+        } else {
+          document.getElementById('pageControls').style.display = 'none';
+          // Para otros archivos, ofrecer descarga
+          document.getElementById('viewerContent').innerHTML = `
+            <div class="notebook-viewer">
+              <div class="empty-state">
+                <i class="fas ${getFileIcon(filename)}"></i>
+                <h3>${filename}</h3>
+                <p>Este tipo de archivo no se puede previsualizar</p>
+                <button class="toolbar-btn" onclick="window.open('${url}')" style="margin-top: 20px;">
+                  <i class="fas fa-download"></i> Descargar archivo
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error cargando archivo:', error);
+      }
+    }
+    
+    async function renderizarPDF(url) {
+      try {
+        const pdf = await pdfjsLib.getDocument(url).promise;
+        currentPDF = pdf;
+        totalPages = pdf.numPages;
+        currentPage = 1;
+        currentRotation = 0;
+        currentZoom = 1.0;
+        
+        updatePageIndicator();
+        await renderizarPagina();
+      } catch (error) {
+        console.error('Error renderizando PDF:', error);
+      }
+    }
+    
+    async function renderizarPagina() {
+      if (!currentPDF) return;
+      
+      try {
+        const page = await currentPDF.getPage(currentPage);
+        const viewport = page.getViewport({ scale: currentZoom, rotation: currentRotation });
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.id = 'pdfCanvas';
+        
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+        
+        document.getElementById('viewerContent').innerHTML = `
+          <div class="notebook-viewer" style="padding: 20px;">
+            <canvas id="pdfCanvas"></canvas>
+          </div>
+        `;
+        
+        document.querySelector('.notebook-viewer').appendChild(canvas);
+      } catch (error) {
+        console.error('Error renderizando página:', error);
+      }
+    }
+    
+    function renderizarImagen(url) {
+      document.getElementById('viewerContent').innerHTML = `
+        <div class="notebook-viewer" style="padding: 20px;">
+          <img id="imageViewer" src="${url}" alt="Imagen" style="max-width: 100%; max-height: 100%; transform: rotate(${currentRotation}deg);">
+        </div>
+      `;
+    }
+    
+    function updatePageIndicator() {
+      document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
+    }
+    
+    async function nextPage() {
+      if (currentPDF && currentPage < totalPages) {
+        currentPage++;
+        await renderizarPagina();
+        updatePageIndicator();
+      }
+    }
+    
+    async function previousPage() {
+      if (currentPDF && currentPage > 1) {
+        currentPage--;
+        await renderizarPagina();
+        updatePageIndicator();
+      }
+    }
+    
+    function zoomIn() {
+      currentZoom += 0.2;
+      document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+      if (currentPDF) renderizarPagina();
+    }
+    
+    function zoomOut() {
+      if (currentZoom > 0.4) {
+        currentZoom -= 0.2;
+        document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+        if (currentPDF) renderizarPagina();
+      }
+    }
+    
+    function rotateLeft() {
+      currentRotation = (currentRotation - 90) % 360;
+      if (currentPDF) {
+        renderizarPagina();
+      } else {
+        const img = document.getElementById('imageViewer');
+        if (img) img.style.transform = `rotate(${currentRotation}deg)`;
+      }
+    }
+    
+    function rotateRight() {
+      currentRotation = (currentRotation + 90) % 360;
+      if (currentPDF) {
+        renderizarPagina();
+      } else {
+        const img = document.getElementById('imageViewer');
+        if (img) img.style.transform = `rotate(${currentRotation}deg)`;
+      }
+    }
+    
+    function downloadCurrentFile() {
+      if (currentFile) {
+        window.open(currentFile.url, '_blank');
+      }
+    }
+    
+    async function eliminarArchivo(filename) {
+      if (!confirm(`¿Eliminar ${filename}?`)) return;
+      
+      try {
+        const { error } = await supabase
+          .storage
+          .from('archivos')
+          .remove([filename]);
+        
+        if (error) throw error;
+        
+        showToast(`✅ ${filename} eliminado`, 'success');
+        await cargarArchivos();
+      } catch (error) {
+        showToast(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+    
+    function showToast(message, type) {
+      alert(message);
+    }
+  </script>
+</body>
+</html>
