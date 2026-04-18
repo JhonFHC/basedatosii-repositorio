@@ -7,3 +7,4 @@ Puede suceder que el mismo css o js ayude a todas las paginas para el diseño u 
 	unidad.html TRABAJA para su funcionamiento con style1.css, slider.js y interacciones.js.
 	login.html TRABAJA para su funcionamiento con style1.css, style-login.css y login.js.
 	admin.html TRABAJA para su funcionamiento con style1.css y admin.js.
+

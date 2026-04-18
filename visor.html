@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/style-unidad.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- PDF.js -->
+  <!-- PDF.js (solo para worker, no se usa renderizado nativo) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   
   <!-- Supabase -->
@@ -38,7 +38,8 @@
       justify-content: space-between;
       align-items: center;
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       z-index: 100;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
@@ -94,7 +95,7 @@
 
     /* Panel lateral - Lista de archivos */
     .files-sidebar {
-      width: 320px;
+      width: 300px;
       background: rgba(30, 41, 59, 0.95);
       backdrop-filter: blur(10px);
       border-right: 1px solid #334155;
@@ -104,13 +105,13 @@
     }
 
     .sidebar-header {
-      padding: 25px 20px;
+      padding: 20px;
       border-bottom: 1px solid #334155;
     }
 
     .sidebar-header h3 {
       color: #00ffc3;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -119,7 +120,7 @@
     .upload-area {
       border: 2px dashed #00ffc3;
       border-radius: 12px;
-      padding: 25px 15px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -132,7 +133,7 @@
     }
 
     .upload-area i {
-      font-size: 2.5rem;
+      font-size: 2rem;
       color: #00ffc3;
       margin-bottom: 10px;
     }
@@ -144,6 +145,8 @@
 
     .upload-area small {
       color: #64748b;
+      display: block;
+      margin-top: 5px;
     }
 
     #fileInput {
@@ -158,15 +161,15 @@
 
     .file-item {
       background: rgba(255, 255, 255, 0.03);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
       cursor: pointer;
       border: 1px solid #334155;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .file-item:hover {
@@ -180,8 +183,8 @@
     }
 
     .file-icon {
-      width: 40px;
-      height: 40px;
+      width: 35px;
+      height: 35px;
       background: rgba(0, 255, 195, 0.1);
       border-radius: 8px;
       display: flex;
@@ -197,13 +200,14 @@
     .file-name {
       color: white;
       font-weight: 500;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       word-break: break-word;
+      font-size: 0.9rem;
     }
 
     .file-meta {
       color: #64748b;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
     }
 
     .file-delete {
@@ -230,24 +234,26 @@
     .viewer-toolbar {
       background: rgba(30, 41, 59, 0.95);
       backdrop-filter: blur(10px);
-      padding: 12px 20px;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       border-bottom: 1px solid #334155;
+      flex-wrap: wrap;
     }
 
     .toolbar-btn {
       background: transparent;
       border: 1px solid #334155;
       color: #cbd5e1;
-      padding: 8px 15px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
+      font-size: 0.85rem;
     }
 
     .toolbar-btn:hover {
@@ -256,14 +262,44 @@
       border-color: #00ffc3;
     }
 
+    .toolbar-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .toolbar-btn:disabled:hover {
+      background: transparent;
+      color: #cbd5e1;
+      border-color: #334155;
+    }
+
     .toolbar-btn i {
-      font-size: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-volver {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #00ffc3;
+      text-decoration: none;
+      border-radius: 6px;
+      border: 1px solid #00ffc3;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+    }
+
+    .btn-volver:hover {
+      background: #00ffc3;
+      color: #0f172a;
     }
 
     .zoom-control {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 5px;
       margin-left: auto;
     }
 
@@ -282,10 +318,10 @@
       background: #1a1f2e;
       border-radius: 15px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 255, 195, 0.1);
-      padding: 30px;
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       position: relative;
+      overflow: hidden;
     }
 
     .notebook-viewer::before {
@@ -294,66 +330,108 @@
       left: 0;
       top: 0;
       bottom: 0;
-      width: 40px;
+      width: 30px;
       background: linear-gradient(to right, rgba(0, 255, 195, 0.05), transparent);
       border-right: 1px solid rgba(0, 255, 195, 0.1);
+      border-radius: 15px 0 0 15px;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    #pdfCanvas, #imageViewer {
+    #imageViewer {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
+      border-radius: 8px;
     }
 
     .empty-state {
       text-align: center;
       color: #64748b;
+      padding: 40px 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .empty-state i {
-      font-size: 5rem;
+      font-size: 4rem;
       color: #334155;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .empty-state h3 {
       color: #00ffc3;
-      margin: 20px 0 10px;
+      margin: 15px 0 10px;
     }
 
     .page-indicator {
       color: #cbd5e1;
-      margin: 0 10px;
+      margin: 0 5px;
+      min-width: 60px;
+      text-align: center;
     }
 
     .file-info-header {
-      margin-left: 20px;
       color: #00ffc3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    .file-info-header i {
+      font-size: 1rem;
+    }
+
+    #pageControls {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    /* Toast personalizado */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #00ffc3;
+      color: #0f172a;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(0, 255, 195, 0.3);
+      z-index: 3000;
+      animation: slideIn 0.3s ease;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .file-info-header i {
-      font-size: 1.2rem;
+    .toast.error {
+      background: #ef4444;
+      color: white;
     }
 
-    .btn-volver {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 15px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #00ffc3;
-      text-decoration: none;
-      border-radius: 8px;
-      border: 1px solid #00ffc3;
-      transition: all 0.3s ease;
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
 
-    .btn-volver:hover {
-      background: #00ffc3;
-      color: #0f172a;
+    /* Responsive */
+    @media (max-width: 768px) {
+      .files-sidebar {
+        width: 250px;
+      }
+      .viewer-toolbar {
+        gap: 8px;
+      }
+      .toolbar-btn span {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -387,9 +465,9 @@
         <div class="upload-area" onclick="document.getElementById('fileInput').click()">
           <i class="fas fa-cloud-upload-alt"></i>
           <p>Click para subir archivos</p>
-          <small>PDF, Word, Excel, Imágenes</small>
+          <small>PDF, Word, Excel, Imágenes, TXT</small>
         </div>
-        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt">
       </div>
       <div class="files-list" id="filesList">
         <div class="empty-state">
@@ -402,41 +480,41 @@
     <!-- Panel principal - Visor -->
     <div class="viewer-main">
       <div class="viewer-toolbar">
-        <a href="unidad.html" class="btn-volver">
+        <a href="#" class="btn-volver" id="volverBtn">
           <i class="fas fa-arrow-left"></i> Volver
         </a>
         
-        <div class="file-info-header" id="fileInfoHeader">
+        <div class="file-info-header">
           <i class="fas fa-file"></i>
           <span id="currentFileName">Ningún archivo seleccionado</span>
         </div>
         
-        <button class="toolbar-btn" onclick="rotateLeft()">
-          <i class="fas fa-undo-alt"></i> Girar Izquierda
+        <button class="toolbar-btn" id="rotateLeftBtn" onclick="rotateLeft()" title="Girar izquierda" disabled>
+          <i class="fas fa-undo-alt"></i> <span>Girar</span>
         </button>
-        <button class="toolbar-btn" onclick="rotateRight()">
-          <i class="fas fa-redo-alt"></i> Girar Derecha
+        <button class="toolbar-btn" id="rotateRightBtn" onclick="rotateRight()" title="Girar derecha" disabled>
+          <i class="fas fa-redo-alt"></i> <span>Girar</span>
         </button>
-        <button class="toolbar-btn" onclick="downloadCurrentFile()">
-          <i class="fas fa-download"></i> Descargar
+        <button class="toolbar-btn" id="downloadBtn" onclick="downloadCurrentFile()" title="Descargar" disabled>
+          <i class="fas fa-download"></i> <span>Descargar</span>
         </button>
         
-        <div class="zoom-control">
-          <button class="toolbar-btn" onclick="zoomOut()">
+        <div class="zoom-control" id="zoomControls" style="display: none;">
+          <button class="toolbar-btn" onclick="zoomOut()" title="Alejar">
             <i class="fas fa-search-minus"></i>
           </button>
           <span class="page-indicator" id="zoomLevel">100%</span>
-          <button class="toolbar-btn" onclick="zoomIn()">
+          <button class="toolbar-btn" onclick="zoomIn()" title="Acercar">
             <i class="fas fa-search-plus"></i>
           </button>
         </div>
         
-        <div style="display: flex; gap: 10px;" id="pageControls">
-          <button class="toolbar-btn" onclick="previousPage()">
+        <div id="pageControls" style="display: none;">
+          <button class="toolbar-btn" onclick="previousPage()" title="Página anterior">
             <i class="fas fa-chevron-left"></i>
           </button>
-          <span class="page-indicator" id="pageIndicator">-</span>
-          <button class="toolbar-btn" onclick="nextPage()">
+          <span class="page-indicator" id="pageIndicator">- / -</span>
+          <button class="toolbar-btn" onclick="nextPage()" title="Página siguiente">
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -447,7 +525,7 @@
           <div class="empty-state">
             <i class="fas fa-book-open"></i>
             <h3>Visor de Archivos</h3>
-            <p>Selecciona un archivo para visualizarlo</p>
+            <p>Selecciona un archivo de la lista o sube uno nuevo</p>
           </div>
         </div>
       </div>
@@ -456,7 +534,7 @@
 
   <script src="js/particles.js"></script>
   <script>
-    // Configuración de PDF.js
+    // ========== CONFIGURACIÓN INICIAL ==========
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     
     let currentPDF = null;
@@ -465,33 +543,73 @@
     let currentZoom = 1.0;
     let currentRotation = 0;
     let currentFile = null;
+    let currentFileType = null; // 'pdf', 'image', 'office', 'text', 'other'
     let files = [];
     
-    // Inicializar
+    // ========== DETECTAR ORIGEN PARA VOLVER ==========
+    const referrer = document.referrer;
+    const volverBtn = document.getElementById('volverBtn');
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (referrer.includes('semana.html')) {
+      const semanaId = urlParams.get('semana') || sessionStorage.getItem('semanaActual');
+      volverBtn.href = semanaId ? `semana.html?id=${semanaId}` : 'unidad.html';
+    } else if (referrer.includes('admin.html')) {
+      volverBtn.href = 'admin.html';
+    } else if (referrer.includes('unidad.html')) {
+      volverBtn.href = 'unidad.html';
+    } else {
+      volverBtn.href = 'unidad.html';
+    }
+    
+    // ========== INICIALIZACIÓN ==========
     document.addEventListener('DOMContentLoaded', async function() {
       await esperarSupabase();
       await cargarArchivos();
       
-      // Configurar upload
       document.getElementById('fileInput').addEventListener('change', subirArchivos);
       
-      // VERIFICAR SI VIENE UN ARCHIVO POR URL
-      const urlParams = new URLSearchParams(window.location.search);
+      // Verificar si viene un archivo por URL
       const fileParam = urlParams.get('file');
       const fileName = urlParams.get('name');
       
       if (fileParam) {
-        // Decodificar URL
-        const fileUrl = decodeURIComponent(fileParam);
-        const decodedName = fileName ? decodeURIComponent(fileName) : 'Archivo';
-        
-        // Cargar automáticamente
         setTimeout(() => {
-          cargarArchivoDesdeURL(fileUrl, decodedName);
-        }, 500);
+          cargarArchivoDesdeURL(decodeURIComponent(fileParam), decodeURIComponent(fileName || 'Archivo'));
+        }, 300);
       }
     });
     
+    // ========== ACTUALIZAR ESTADO DE BOTONES SEGÚN TIPO DE ARCHIVO ==========
+    function updateToolbarForFileType(type) {
+      const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+      const rotateRightBtn = document.getElementById('rotateRightBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const zoomControls = document.getElementById('zoomControls');
+      const pageControls = document.getElementById('pageControls');
+      
+      // Habilitar descarga siempre que haya archivo
+      downloadBtn.disabled = !currentFile;
+      
+      if (type === 'image') {
+        rotateLeftBtn.disabled = false;
+        rotateRightBtn.disabled = false;
+        zoomControls.style.display = 'flex';
+        pageControls.style.display = 'none';
+      } else if (type === 'pdf') {
+        rotateLeftBtn.disabled = true;
+        rotateRightBtn.disabled = true;
+        zoomControls.style.display = 'none';
+        pageControls.style.display = 'none';
+      } else {
+        rotateLeftBtn.disabled = true;
+        rotateRightBtn.disabled = true;
+        zoomControls.style.display = 'none';
+        pageControls.style.display = 'none';
+      }
+    }
+    
+    // ========== ESPERAR A SUPABASE ==========
     async function esperarSupabase() {
       for (let i = 0; i < 15; i++) {
         if (typeof supabase !== 'undefined' && supabase) return true;
@@ -500,47 +618,27 @@
       throw new Error('Supabase no disponible');
     }
     
+    // ========== CARGAR LISTA DE ARCHIVOS ==========
     async function cargarArchivos() {
       try {
-        const { data, error } = await supabase
-          .storage
-          .from('archivos')
-          .list();
-        
-        if (error) throw error;
-        
-        files = data || [];
+        const { data, error } = await supabase.storage.from('archivos').list();
+        if (error) { files = []; } else { files = data || []; }
         renderizarListaArchivos();
-      } catch (error) {
-        console.error('Error cargando archivos:', error);
-      }
+      } catch (error) { files = []; renderizarListaArchivos(); }
     }
     
     function renderizarListaArchivos() {
       const container = document.getElementById('filesList');
-      
       if (files.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>No hay archivos</p>
-          </div>
-        `;
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No hay archivos</p></div>';
         return;
       }
       
       container.innerHTML = files.map(file => `
         <div class="file-item" onclick="cargarArchivo('${file.name}')">
-          <div class="file-icon">
-            <i class="fas ${getFileIcon(file.name)}"></i>
-          </div>
-          <div class="file-info">
-            <div class="file-name">${file.name}</div>
-            <div class="file-meta">${formatBytes(file.metadata?.size || 0)}</div>
-          </div>
-          <div class="file-delete" onclick="event.stopPropagation(); eliminarArchivo('${file.name}')">
-            <i class="fas fa-trash"></i>
-          </div>
+          <div class="file-icon"><i class="fas ${getFileIcon(file.name)}"></i></div>
+          <div class="file-info"><div class="file-name">${file.name}</div></div>
+          <div class="file-delete" onclick="event.stopPropagation(); eliminarArchivo('${file.name}')"><i class="fas fa-trash"></i></div>
         </div>
       `).join('');
     }
@@ -548,33 +646,49 @@
     function getFileIcon(filename) {
       const ext = filename.split('.').pop().toLowerCase();
       if (ext === 'pdf') return 'fa-file-pdf';
-      if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fa-file-image';
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'fa-file-image';
       if (['doc', 'docx'].includes(ext)) return 'fa-file-word';
       if (['xls', 'xlsx'].includes(ext)) return 'fa-file-excel';
+      if (['ppt', 'pptx'].includes(ext)) return 'fa-file-powerpoint';
+      if (ext === 'txt') return 'fa-file-alt';
       return 'fa-file';
     }
     
-    function formatBytes(bytes) {
-      if (!bytes) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
+    // ========== SUBIR ARCHIVOS (CON SANITIZACIÓN) ==========
     async function subirArchivos(event) {
-      const files = event.target.files;
+      const filesToUpload = event.target.files;
       
-      for (const file of files) {
+      for (const file of filesToUpload) {
         try {
-          const { error } = await supabase
-            .storage
-            .from('archivos')
-            .upload(file.name, file);
+          let nombreOriginal = file.name;
+          let extension = '';
+          
+          const ultimoPunto = nombreOriginal.lastIndexOf('.');
+          if (ultimoPunto > 0) {
+            extension = nombreOriginal.substring(ultimoPunto);
+            nombreOriginal = nombreOriginal.substring(0, ultimoPunto);
+          }
+          
+          let nombreLimpio = nombreOriginal
+            .replace(/[°ºª]/g, '')
+            .replace(/[:\/,;]/g, '-')
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_-]/g, '')
+            .replace(/_+/g, '_')
+            .replace(/-+/g, '-')
+            .replace(/^[-_]+|[-_]+$/g, '');
+          
+          if (!nombreLimpio) nombreLimpio = 'archivo_' + Date.now();
+          
+          const nombreFinal = nombreLimpio + extension;
+          
+          showToast(`📤 Subiendo ${nombreFinal}...`, 'success');
+          
+          const { error } = await supabase.storage.from('archivos').upload(nombreFinal, file, { cacheControl: '3600', upsert: true });
           
           if (error) throw error;
           
-          showToast(`✅ ${file.name} subido`, 'success');
+          showToast(`✅ ${nombreFinal} subido`, 'success');
         } catch (error) {
           showToast(`❌ Error: ${error.message}`, 'error');
         }
@@ -584,50 +698,68 @@
       event.target.value = '';
     }
     
+    // ========== CARGAR ARCHIVO ==========
     async function cargarArchivo(filename) {
-      try {
-        const { data } = supabase
-          .storage
-          .from('archivos')
-          .getPublicUrl(filename);
-        
-        await cargarArchivoDesdeURL(data.publicUrl, filename);
-        
-        // Marcar como activo en la lista
-        document.querySelectorAll('.file-item').forEach(item => {
-          item.classList.remove('active');
-          if (item.querySelector('.file-name').textContent === filename) {
-            item.classList.add('active');
-          }
-        });
-      } catch (error) {
-        console.error('Error:', error);
-      }
+      const { data } = supabase.storage.from('archivos').getPublicUrl(filename);
+      await cargarArchivoDesdeURL(data.publicUrl, filename);
+      
+      document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.querySelector('.file-name').textContent === filename) item.classList.add('active');
+      });
     }
     
+    // ========== CARGAR ARCHIVO DESDE URL ==========
     async function cargarArchivoDesdeURL(url, filename) {
       try {
-        currentFile = { name: filename, url: url };
+        let finalUrl = url;
+        
+        if (url.startsWith('archivos/')) {
+          const nombreArchivo = url.replace('archivos/', '');
+          const { data } = supabase.storage.from('archivos').getPublicUrl(nombreArchivo);
+          finalUrl = data.publicUrl;
+        }
+        
+        if (!finalUrl.startsWith('http')) {
+          const { data } = supabase.storage.from('archivos').getPublicUrl(filename);
+          finalUrl = data.publicUrl;
+        }
+        
+        currentFile = { name: filename, url: finalUrl };
         document.getElementById('currentFileName').textContent = filename;
         
         const ext = filename.split('.').pop().toLowerCase();
         
+        currentRotation = 0;
+        currentZoom = 1.0;
+        document.getElementById('zoomLevel').textContent = '100%';
+        
         if (ext === 'pdf') {
-          document.getElementById('pageControls').style.display = 'flex';
-          await renderizarPDF(url);
-        } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-          document.getElementById('pageControls').style.display = 'none';
-          renderizarImagen(url);
+          currentFileType = 'pdf';
+          updateToolbarForFileType('pdf');
+          await renderizarPDF(finalUrl);
+        } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+          currentFileType = 'image';
+          updateToolbarForFileType('image');
+          renderizarImagen(finalUrl);
+        } else if (['txt', 'sql', 'js', 'html', 'css', 'json'].includes(ext)) {
+          currentFileType = 'text';
+          updateToolbarForFileType('text');
+          await renderizarTexto(finalUrl);
+        } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
+          currentFileType = 'office';
+          updateToolbarForFileType('office');
+          renderizarOffice(finalUrl, filename);
         } else {
-          document.getElementById('pageControls').style.display = 'none';
-          // Para otros archivos, ofrecer descarga
+          currentFileType = 'other';
+          updateToolbarForFileType('other');
           document.getElementById('viewerContent').innerHTML = `
             <div class="notebook-viewer">
               <div class="empty-state">
                 <i class="fas ${getFileIcon(filename)}"></i>
                 <h3>${filename}</h3>
                 <p>Este tipo de archivo no se puede previsualizar</p>
-                <button class="toolbar-btn" onclick="window.open('${url}')" style="margin-top: 20px;">
+                <button class="toolbar-btn" onclick="window.open('${finalUrl}')" style="margin-top: 20px;">
                   <i class="fas fa-download"></i> Descargar archivo
                 </button>
               </div>
@@ -635,145 +767,176 @@
           `;
         }
       } catch (error) {
-        console.error('Error cargando archivo:', error);
+        console.error('Error:', error);
+        showToast('Error al cargar archivo', 'error');
       }
     }
     
+    // ========== RENDERIZAR PDF (GOOGLE DOCS VIEWER - 100% COMPATIBLE) ==========
     async function renderizarPDF(url) {
       try {
-        const pdf = await pdfjsLib.getDocument(url).promise;
-        currentPDF = pdf;
-        totalPages = pdf.numPages;
-        currentPage = 1;
-        currentRotation = 0;
-        currentZoom = 1.0;
-        
-        updatePageIndicator();
-        await renderizarPagina();
-      } catch (error) {
-        console.error('Error renderizando PDF:', error);
-      }
-    }
-    
-    async function renderizarPagina() {
-      if (!currentPDF) return;
-      
-      try {
-        const page = await currentPDF.getPage(currentPage);
-        const viewport = page.getViewport({ scale: currentZoom, rotation: currentRotation });
-        
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        canvas.id = 'pdfCanvas';
-        
-        await page.render({
-          canvasContext: context,
-          viewport: viewport
-        }).promise;
-        
+        const encodedUrl = encodeURIComponent(url);
         document.getElementById('viewerContent').innerHTML = `
-          <div class="notebook-viewer" style="padding: 20px;">
-            <canvas id="pdfCanvas"></canvas>
+          <div class="notebook-viewer" style="padding: 0; overflow: hidden; width: 100%; height: 100%; display: flex; flex-direction: column;">
+            <div style="padding: 12px 15px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; gap: 10px; flex-shrink: 0;">
+              <a href="${url}" target="_blank" class="toolbar-btn">
+                <i class="fas fa-external-link-alt"></i> Abrir en nueva pestaña
+              </a>
+              <button class="toolbar-btn" onclick="downloadCurrentFile()">
+                <i class="fas fa-download"></i> Descargar
+              </button>
+            </div>
+            <iframe 
+              src="https://docs.google.com/viewer?url=${encodedUrl}&embedded=true"
+              style="width: 100%; flex: 1; border: none; background: white;"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            ></iframe>
           </div>
         `;
-        
-        document.querySelector('.notebook-viewer').appendChild(canvas);
       } catch (error) {
-        console.error('Error renderizando página:', error);
+        console.error('Error:', error);
+        window.open(url, '_blank');
       }
     }
     
+    // ========== RENDERIZAR IMAGEN ==========
     function renderizarImagen(url) {
       document.getElementById('viewerContent').innerHTML = `
-        <div class="notebook-viewer" style="padding: 20px;">
-          <img id="imageViewer" src="${url}" alt="Imagen" style="max-width: 100%; max-height: 100%; transform: rotate(${currentRotation}deg);">
+        <div class="notebook-viewer" style="padding: 20px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+          <img id="imageViewer" src="${url}" alt="Imagen" style="max-width: 100%; max-height: 100%; transform: rotate(${currentRotation}deg); border-radius: 8px; transition: transform 0.3s ease;">
         </div>
       `;
     }
     
-    function updatePageIndicator() {
-      document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
-    }
-    
-    async function nextPage() {
-      if (currentPDF && currentPage < totalPages) {
-        currentPage++;
-        await renderizarPagina();
-        updatePageIndicator();
+    // ========== RENDERIZAR TEXTO ==========
+    async function renderizarTexto(url) {
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        document.getElementById('viewerContent').innerHTML = `
+          <div class="notebook-viewer" style="padding: 30px; width: 100%; height: 100%; overflow: auto;">
+            <pre style="color: #cbd5e1; white-space: pre-wrap; word-wrap: break-word; font-family: monospace; line-height: 1.6;">${text}</pre>
+          </div>
+        `;
+      } catch (error) {
+        showToast('Error al cargar archivo de texto', 'error');
       }
     }
     
-    async function previousPage() {
-      if (currentPDF && currentPage > 1) {
-        currentPage--;
-        await renderizarPagina();
-        updatePageIndicator();
-      }
+    // ========== RENDERIZAR OFFICE ==========
+    function renderizarOffice(url, filename) {
+      const encodedUrl = encodeURIComponent(url);
+      document.getElementById('viewerContent').innerHTML = `
+        <div class="notebook-viewer" style="padding: 0; overflow: hidden; width: 100%; height: 100%; display: flex; flex-direction: column;">
+          <div style="padding: 10px; background: #1e293b; border-bottom: 1px solid #334155; flex-shrink: 0;">
+            <a href="${url}" target="_blank" class="toolbar-btn">
+              <i class="fas fa-external-link-alt"></i> Abrir en nueva pestaña
+            </a>
+          </div>
+          <iframe 
+            src="https://docs.google.com/gview?url=${encodedUrl}&embedded=true" 
+            style="width: 100%; flex: 1; border: none; background: white;"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          ></iframe>
+        </div>
+      `;
     }
     
+    // ========== CONTROLES DE ZOOM (SOLO IMÁGENES) ==========
     function zoomIn() {
+      if (currentFileType !== 'image') return;
       currentZoom += 0.2;
       document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
-      if (currentPDF) renderizarPagina();
+      const img = document.getElementById('imageViewer');
+      if (img) img.style.transform = `rotate(${currentRotation}deg) scale(${currentZoom})`;
     }
     
     function zoomOut() {
+      if (currentFileType !== 'image') return;
       if (currentZoom > 0.4) {
         currentZoom -= 0.2;
         document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
-        if (currentPDF) renderizarPagina();
+        const img = document.getElementById('imageViewer');
+        if (img) img.style.transform = `rotate(${currentRotation}deg) scale(${currentZoom})`;
       }
     }
     
+    // ========== CONTROLES DE ROTACIÓN (SOLO IMÁGENES) ==========
     function rotateLeft() {
+      if (currentFileType !== 'image') return;
       currentRotation = (currentRotation - 90) % 360;
-      if (currentPDF) {
-        renderizarPagina();
-      } else {
-        const img = document.getElementById('imageViewer');
-        if (img) img.style.transform = `rotate(${currentRotation}deg)`;
-      }
+      const img = document.getElementById('imageViewer');
+      if (img) img.style.transform = `rotate(${currentRotation}deg) scale(${currentZoom})`;
     }
     
     function rotateRight() {
+      if (currentFileType !== 'image') return;
       currentRotation = (currentRotation + 90) % 360;
-      if (currentPDF) {
-        renderizarPagina();
-      } else {
-        const img = document.getElementById('imageViewer');
-        if (img) img.style.transform = `rotate(${currentRotation}deg)`;
-      }
+      const img = document.getElementById('imageViewer');
+      if (img) img.style.transform = `rotate(${currentRotation}deg) scale(${currentZoom})`;
     }
     
+    // ========== DESCARGAR ==========
     function downloadCurrentFile() {
       if (currentFile) {
         window.open(currentFile.url, '_blank');
+      } else {
+        showToast('No hay archivo seleccionado', 'error');
       }
     }
     
+    // ========== ELIMINAR ARCHIVO ==========
     async function eliminarArchivo(filename) {
-      if (!confirm(`¿Eliminar ${filename}?`)) return;
+      if (!confirm(`¿Estás seguro de eliminar "${filename}"?`)) return;
       
       try {
-        const { error } = await supabase
-          .storage
-          .from('archivos')
-          .remove([filename]);
-        
+        const { error } = await supabase.storage.from('archivos').remove([filename]);
         if (error) throw error;
         
         showToast(`✅ ${filename} eliminado`, 'success');
         await cargarArchivos();
+        
+        if (currentFile && currentFile.name === filename) {
+          document.getElementById('viewerContent').innerHTML = `
+            <div class="notebook-viewer">
+              <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h3>Visor de Archivos</h3>
+                <p>Selecciona un archivo de la lista o sube uno nuevo</p>
+              </div>
+            </div>
+          `;
+          document.getElementById('currentFileName').textContent = 'Ningún archivo seleccionado';
+          currentFile = null;
+          currentFileType = null;
+          updateToolbarForFileType(null);
+        }
       } catch (error) {
         showToast(`❌ Error: ${error.message}`, 'error');
       }
     }
     
-    function showToast(message, type) {
-      alert(message);
+    // ========== TOAST ==========
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        <span>${message}</span>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
+    
+    // Funciones dummy para mantener compatibilidad
+    function updatePageIndicator() {}
+    async function nextPage() {}
+    async function previousPage() {}
   </script>
 </body>
 </html>

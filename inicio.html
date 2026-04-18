@@ -254,7 +254,7 @@
       </div>
     </div>
 
-    <!-- Información de la UPLA (Se mantiene igual) -->
+    <!-- Información de la UPLA -->
     <section class="seccion-contenido fade-in">
       <div class="icono-seccion">
         <i class="fas fa-university"></i>
@@ -278,7 +278,7 @@
       </div>
     </section>
 
-    <!-- Slider (Actualizado con información de Base de Datos) -->
+    <!-- Slider -->
     <section class="seccion-contenido fade-in">
       <div class="icono-seccion">
         <i class="fas fa-images"></i>
@@ -330,5 +330,25 @@
       </div>
     </section>
   </main>
+
+  <!-- ========== SCRIPT PARA ACTUALIZAR TÍTULO DEL CURSO ========== -->
+  <script>
+    (function() {
+      const config = JSON.parse(localStorage.getItem('configCurso') || '{}');
+      const nombreCurso = config.curso || 'Base de Datos II';
+      
+      // Actualizar todos los h1, h2, h3 que contengan "Base de Datos"
+      document.querySelectorAll('h1, h2, h3, .titulo-principal h1').forEach(el => {
+        if (el.textContent.includes('Base de Datos')) {
+          el.textContent = el.textContent.replace(/Base de Datos II?/g, nombreCurso);
+        }
+      });
+      
+      // Actualizar título de la página
+      if (document.title.includes('Base de Datos')) {
+        document.title = document.title.replace(/Base de Datos II?/g, nombreCurso);
+      }
+    })();
+  </script>
 </body>
 </html>

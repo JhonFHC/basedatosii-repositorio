@@ -1,6 +1,6 @@
 // admin.js - Panel de Administración CONECTADO A SUPABASE
 
-// ========== DATOS EN MEMORIA (Caché local) ==========
+// ========== DATOS EN MEMORIA ==========
 let appData = {
   unidades: [],
   semanas: [],
@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   await esperarSupabase();
   await cargarDatosDesdeSupabase();
   cargarSelectUnidades();
+  cargarConfiguracionGuardada();
   
   console.log('✅ Panel listo');
 });
@@ -53,7 +54,6 @@ async function cargarDatosDesdeSupabase() {
     
     if (errorU) throw errorU;
     appData.unidades = unidades || [];
-    console.log('✅ Unidades cargadas:', appData.unidades.length);
     
     const { data: semanas, error: errorS } = await supabase
       .from('semanas')
@@ -62,7 +62,6 @@ async function cargarDatosDesdeSupabase() {
     
     if (errorS) throw errorS;
     appData.semanas = semanas || [];
-    console.log('✅ Semanas cargadas:', appData.semanas.length);
     
     const { data: archivos, error: errorA } = await supabase
       .from('archivos')
@@ -71,7 +70,6 @@ async function cargarDatosDesdeSupabase() {
     
     if (errorA) throw errorA;
     appData.archivos = archivos || [];
-    console.log('✅ Archivos cargados:', appData.archivos.length);
     
     const { data: actividad, error: errorAct } = await supabase
       .from('actividad')
@@ -118,15 +116,10 @@ function switchPage(pageName) {
   const targetPage = document.getElementById(`page-${targetPageName}`);
   if (targetPage) {
     targetPage.classList.add('active');
-  } else {
-    console.warn('⚠️ Página no encontrada:', `page-${targetPageName}`);
   }
   
   document.querySelectorAll('.sidebar-link').forEach(link => {
     link.classList.remove('active');
-  });
-  
-  document.querySelectorAll('.sidebar-link').forEach(link => {
     const span = link.querySelector('span');
     if (span) {
       const text = span.textContent.toLowerCase();
@@ -140,22 +133,6 @@ function switchPage(pageName) {
       }
     }
   });
-  
-  document.querySelectorAll('.admin-nav a').forEach(link => {
-    link.classList.remove('active');
-    const text = link.textContent.toLowerCase();
-    if (text.includes(pageName.toLowerCase()) || 
-        (pageName === 'semanas' && text.includes('semanas')) ||
-        (pageName === 'crearSemana' && text.includes('dashboard')) ||
-        (pageName === 'editarSemana' && text.includes('semanas'))) {
-      link.classList.add('active');
-    }
-  });
-  
-  if (pageName === 'dashboard') {
-    const navDashboard = document.getElementById('navDashboard');
-    if (navDashboard) navDashboard.classList.add('active');
-  }
 }
 
 // ========== DASHBOARD ==========
@@ -261,7 +238,7 @@ function cargarTablaArchivos() {
     return `
       <tr>
         <td>${iconoTipo} ${archivo.nombre}</td>
-        <td><a href="${archivo.url}" target="_blank" style="color: #00ffc3;">Ver archivo</a></td>
+        <td><a href="#" onclick="abrirEnVisor('${archivo.url}', '${archivo.nombre}'); return false;" style="color: #00ffc3;">Ver archivo</a></td>
         <td>${semana ? `Semana ${semana.numero}` : 'General'}</td>
         <td>
           <button class="btn-icon delete" onclick="eliminarArchivo(${archivo.id})"><i class="fas fa-trash"></i></button>
@@ -280,10 +257,6 @@ document.getElementById('formCrearSemana')?.addEventListener('submit', async fun
   const submitBtn = this.querySelector('button[type="submit"]');
   const editingId = this.dataset.editingId;
   
-  if (!submitBtn.dataset.originalText) {
-    submitBtn.dataset.originalText = submitBtn.innerHTML;
-  }
-  
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (editingId ? 'Actualizando...' : 'Guardando...');
   submitBtn.disabled = true;
   
@@ -292,7 +265,7 @@ document.getElementById('formCrearSemana')?.addEventListener('submit', async fun
       unidad_id: parseInt(document.getElementById('createUnidad').value),
       numero: parseInt(document.getElementById('createNumero').value),
       titulo: document.getElementById('createTitulo').value,
-      descripcion: document.getElementById('createDescripcion').value,
+      descripcion: '',
       contenido: document.getElementById('createContenido').value || '',
       pdf_url: document.getElementById('createPDF').value || null,
       video_url: document.getElementById('createVideo').value || null,
@@ -301,32 +274,21 @@ document.getElementById('formCrearSemana')?.addEventListener('submit', async fun
     
     let result;
     if (editingId) {
-      result = await supabase
-        .from('semanas')
-        .update(nuevaSemana)
-        .eq('id', editingId)
-        .select();
-      
-      showToast('✅ Semana actualizada correctamente', 'success');
+      result = await supabase.from('semanas').update(nuevaSemana).eq('id', editingId).select();
+      showToast('✅ Semana actualizada', 'success');
     } else {
-      result = await supabase
-        .from('semanas')
-        .insert([nuevaSemana])
-        .select();
-      
+      result = await supabase.from('semanas').insert([nuevaSemana]).select();
       await supabase.from('actividad').insert([{
         accion: 'Creación',
         elemento: `Semana ${nuevaSemana.numero}: ${nuevaSemana.titulo}`,
         usuario: sessionStorage.getItem('adminName') || 'Admin'
       }]);
-      
-      showToast('✅ Semana creada correctamente', 'success');
+      showToast('✅ Semana creada', 'success');
     }
     
     if (result.error) throw result.error;
     
     await cargarDatosDesdeSupabase();
-    
     this.reset();
     
     const htmlPaste = document.getElementById('createHTMLPaste');
@@ -334,20 +296,14 @@ document.getElementById('formCrearSemana')?.addEventListener('submit', async fun
     
     submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Semana';
     submitBtn.disabled = false;
-    delete submitBtn.dataset.originalText;
     delete this.dataset.editingId;
-    
     cargarSelectUnidades();
     
   } catch (error) {
     console.error('❌ Error:', error);
     showToast('Error: ' + error.message, 'error');
-    
-    submitBtn.innerHTML = editingId ? 
-      '<i class="fas fa-save"></i> Actualizar Semana' : 
-      '<i class="fas fa-save"></i> Crear Semana';
+    submitBtn.innerHTML = editingId ? '<i class="fas fa-save"></i> Actualizar Semana' : '<i class="fas fa-save"></i> Crear Semana';
     submitBtn.disabled = false;
-    delete submitBtn.dataset.originalText;
   }
 });
 
@@ -357,12 +313,7 @@ async function eliminarSemana(id) {
   
   try {
     const semana = appData.semanas.find(s => s.id === id);
-    
-    const { error } = await supabase
-      .from('semanas')
-      .delete()
-      .eq('id', id);
-    
+    const { error } = await supabase.from('semanas').delete().eq('id', id);
     if (error) throw error;
     
     await supabase.from('actividad').insert([{
@@ -373,9 +324,7 @@ async function eliminarSemana(id) {
     
     await cargarDatosDesdeSupabase();
     showToast('✅ Semana eliminada', 'success');
-    
   } catch (error) {
-    console.error('❌ Error:', error);
     showToast('Error: ' + error.message, 'error');
   }
 }
@@ -386,20 +335,13 @@ async function eliminarUnidad(id) {
   
   try {
     await supabase.from('semanas').delete().eq('unidad_id', id);
-    
-    const { error } = await supabase
-      .from('unidades')
-      .delete()
-      .eq('id', id);
-    
+    const { error } = await supabase.from('unidades').delete().eq('id', id);
     if (error) throw error;
     
     await cargarDatosDesdeSupabase();
     cargarSelectUnidades();
     showToast('✅ Unidad eliminada', 'success');
-    
   } catch (error) {
-    console.error('❌ Error:', error);
     showToast('Error: ' + error.message, 'error');
   }
 }
@@ -409,18 +351,20 @@ async function eliminarArchivo(id) {
   if (!confirm('¿Eliminar este archivo?')) return;
   
   try {
-    const { error } = await supabase
-      .from('archivos')
-      .delete()
-      .eq('id', id);
+    const archivo = appData.archivos.find(a => a.id === id);
     
+    // Eliminar de Storage si es local
+    if (archivo?.tipo === 'local') {
+      await supabase.storage.from('archivos').remove([archivo.nombre]);
+    }
+    
+    // Eliminar de la tabla
+    const { error } = await supabase.from('archivos').delete().eq('id', id);
     if (error) throw error;
     
     await cargarDatosDesdeSupabase();
     showToast('✅ Archivo eliminado', 'success');
-    
   } catch (error) {
-    console.error('❌ Error:', error);
     showToast('Error: ' + error.message, 'error');
   }
 }
@@ -438,7 +382,6 @@ function editarSemana(id) {
   document.getElementById('createUnidad').value = semana.unidad_id;
   document.getElementById('createNumero').value = semana.numero;
   document.getElementById('createTitulo').value = semana.titulo;
-  document.getElementById('createDescripcion').value = semana.descripcion || '';
   document.getElementById('createContenido').value = semana.contenido || '';
   document.getElementById('createPDF').value = semana.pdf_url || '';
   document.getElementById('createVideo').value = semana.video_url || '';
@@ -476,23 +419,24 @@ function editarUnidad(id) {
   openModal('modalUnidad');
 }
 
-// ========== ABRIR MODAL NUEVA UNIDAD ==========
-function abrirModalUnidad() {
-  document.getElementById('modalUnidadTitle').textContent = 'Nueva Unidad';
-  document.getElementById('unidadId').value = '';
-  document.getElementById('formUnidad').reset();
-  openModal('modalUnidad');
+// ========== MENSAJE UNIDAD DESHABILITADA ==========
+function mostrarMensajeUnidadDeshabilitada() {
+  showToast('📢 Esta funcionalidad estará disponible próximamente', 'success');
 }
 
-// ========== GUARDAR UNIDAD (CON LÍMITE DE 4) ==========
+// ========== ABRIR MODAL UNIDAD (DESHABILITADO) ==========
+function abrirModalUnidad() {
+  mostrarMensajeUnidadDeshabilitada();
+}
+
+// ========== GUARDAR UNIDAD ==========
 document.getElementById('formUnidad')?.addEventListener('submit', async function(e) {
   e.preventDefault();
   
   const id = document.getElementById('unidadId').value;
   
-  // Si es nueva y ya hay 4 unidades, no permitir
   if (!id && appData.unidades.length >= 4) {
-    showToast('⚠️ Solo se permiten 4 unidades. Edita las existentes.', 'error');
+    showToast('⚠️ Solo se permiten 4 unidades', 'error');
     return;
   }
   
@@ -520,59 +464,116 @@ document.getElementById('formUnidad')?.addEventListener('submit', async function
     closeModal('modalUnidad');
     
   } catch (error) {
-    console.error('❌ Error:', error);
     showToast('Error: ' + error.message, 'error');
   }
 });
 
-// ========== GUARDAR ARCHIVO (CON SUBIDA LOCAL) ==========
+// ========== GUARDAR ARCHIVO (CON SANITIZACIÓN DE NOMBRES) ==========
 async function guardarArchivo() {
   let nombre = document.getElementById('fileName')?.value;
-  let url = document.getElementById('fileUrl')?.value;
+  const url = document.getElementById('fileUrl')?.value;
   const semanaId = document.getElementById('fileSemana')?.value;
   const localFile = document.getElementById('localFile')?.files[0];
   
-  let finalUrl = url;
+  const subiendoArchivoLocal = !!localFile;
+  const subiendoEnlace = !!url;
   
-  // Si hay archivo local, "simular" subida
-  if (localFile) {
-    finalUrl = `almacenado/${localFile.name}`;
-    
-    if (!nombre) {
-      nombre = localFile.name;
-      document.getElementById('fileName').value = localFile.name;
-    }
-  }
-  
-  if (!nombre) {
-    showToast('❌ El nombre del archivo es obligatorio', 'error');
+  if (!subiendoArchivoLocal && !subiendoEnlace) {
+    showToast('❌ Debes proporcionar un enlace o seleccionar un archivo', 'error');
     return;
-  }
-  
-  if (!finalUrl && !localFile) {
-    showToast('❌ Debes proporcionar un enlace o subir un archivo', 'error');
-    return;
-  }
-  
-  if (!finalUrl && localFile) {
-    finalUrl = `almacenado/${localFile.name}`;
   }
   
   try {
-    const { error } = await supabase
+    let finalUrl = '';
+    let nombreFinal = nombre;
+    
+    if (subiendoArchivoLocal) {
+      // ========== SANITIZAR NOMBRE DEL ARCHIVO ==========
+      let nombreOriginal = localFile.name;
+      let extension = '';
+      
+      const ultimoPunto = nombreOriginal.lastIndexOf('.');
+      if (ultimoPunto > 0) {
+        extension = nombreOriginal.substring(ultimoPunto);
+        nombreOriginal = nombreOriginal.substring(0, ultimoPunto);
+      }
+      
+      let nombreLimpio = nombreOriginal
+        .replace(/[°ºª]/g, '')
+        .replace(/[:\/,;]/g, '-')
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9_-]/g, '')
+        .replace(/_+/g, '_')
+        .replace(/-+/g, '-')
+        .replace(/^[-_]+|[-_]+$/g, '');
+      
+      if (!nombreLimpio) {
+        nombreLimpio = 'archivo_' + Date.now();
+      }
+      
+      nombreFinal = nombreLimpio + extension;
+      
+      // Si el usuario escribió un nombre, usarlo pero sanitizado
+      if (nombre) {
+        let nombreUsuario = nombre;
+        const puntoUsuario = nombreUsuario.lastIndexOf('.');
+        if (puntoUsuario > 0) {
+          nombreUsuario = nombreUsuario.substring(0, puntoUsuario);
+        }
+        nombreUsuario = nombreUsuario
+          .replace(/[°ºª]/g, '')
+          .replace(/[:\/,;]/g, '-')
+          .replace(/\s+/g, '_')
+          .replace(/[^a-zA-Z0-9_-]/g, '');
+        if (nombreUsuario) {
+          nombreFinal = nombreUsuario + extension;
+        }
+      }
+      
+      document.getElementById('fileName').value = nombreFinal;
+      
+      showToast(`📤 Subiendo ${nombreFinal}...`, 'success');
+      
+      const { error } = await supabase
+        .storage
+        .from('archivos')
+        .upload(nombreFinal, localFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (error) throw error;
+      
+      const { data: urlData } = supabase
+        .storage
+        .from('archivos')
+        .getPublicUrl(nombreFinal);
+      
+      finalUrl = urlData.publicUrl;
+      
+    } else if (subiendoEnlace) {
+      if (!nombre) {
+        showToast('❌ El nombre del archivo es obligatorio para enlaces', 'error');
+        return;
+      }
+      finalUrl = url;
+      nombreFinal = nombre;
+    }
+    
+    const { error: dbError } = await supabase
       .from('archivos')
       .insert([{
-        nombre: nombre,
+        nombre: nombreFinal,
         url: finalUrl,
         semana_id: semanaId || null,
-        tipo: localFile ? 'local' : 'enlace'
+        tipo: subiendoArchivoLocal ? 'local' : 'enlace'
       }]);
     
-    if (error) throw error;
+    if (dbError) throw dbError;
     
     await supabase.from('actividad').insert([{
       accion: 'Subida',
-      elemento: `Archivo: ${nombre}`,
+      elemento: `Archivo: ${nombreFinal}`,
       usuario: sessionStorage.getItem('adminName') || 'Admin'
     }]);
     
@@ -590,6 +591,11 @@ async function guardarArchivo() {
   }
 }
 
+// ========== ABRIR EN VISOR ==========
+function abrirEnVisor(url, nombre) {
+  window.location.href = `visor.html?file=${encodeURIComponent(url)}&name=${encodeURIComponent(nombre)}`;
+}
+
 // ========== IMPORTAR DATOS ==========
 function importarDatos() {
   document.getElementById('importFile')?.click();
@@ -602,9 +608,7 @@ document.getElementById('importFile')?.addEventListener('change', async function
   try {
     const text = await file.text();
     const data = JSON.parse(text);
-    
     showToast('✅ Función en desarrollo', 'success');
-    
   } catch (error) {
     showToast('❌ Error al importar: ' + error.message, 'error');
   }
@@ -643,45 +647,43 @@ function logout() {
   window.location.href = 'login.html';
 }
 
+// ========== CONFIGURACIÓN ==========
+function cargarConfiguracionGuardada() {
+  const config = JSON.parse(localStorage.getItem('configCurso') || '{}');
+  if (document.getElementById('configCurso')) {
+    document.getElementById('configCurso').value = config.curso || 'Base de Datos II';
+    document.getElementById('configProfesor').value = config.profesor || 'MG. Raul Enrique Fernandez Bejarano';
+    document.getElementById('configCiclo').value = config.ciclo || '2024-II';
+  }
+  actualizarTitulosEnPaginas(config.curso);
+}
+
+function guardarConfiguracion() {
+  const curso = document.getElementById('configCurso')?.value || 'Base de Datos II';
+  const profesor = document.getElementById('configProfesor')?.value || 'MG. Raul Enrique Fernandez Bejarano';
+  const ciclo = document.getElementById('configCiclo')?.value || '2024-II';
+  
+  localStorage.setItem('configCurso', JSON.stringify({ curso, profesor, ciclo }));
+  actualizarTitulosEnPaginas(curso);
+  showToast('✅ Configuración guardada', 'success');
+}
+
+function actualizarTitulosEnPaginas(curso) {
+  localStorage.setItem('nombreCursoActual', curso);
+}
+
 // ========== GENERAR CÓDIGO HTML ==========
 function generateHTMLCode() {
   const titulo = document.getElementById('createTitulo').value;
   const numero = document.getElementById('createNumero').value;
-  const descripcion = document.getElementById('createDescripcion').value;
   const contenido = document.getElementById('createContenido').value;
-  const pdfUrl = document.getElementById('createPDF').value;
-  const videoUrl = document.getElementById('createVideo').value;
   
-  const htmlCode = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Semana ${numero} - ${titulo}</title>
-  <link rel="stylesheet" href="../../css/style1.css">
-</head>
-<body class="dark-theme">
-  <canvas id="particles"></canvas>
-  <main class="container" style="margin-top: 100px;">
-    <h1 style="color: #00ffc3;">Semana ${numero}: ${titulo}</h1>
-    <div class="seccion-contenido">
-      <h2>Descripción</h2>
-      <p>${descripcion}</p>
-    </div>
-    <div class="seccion-contenido">
-      <h2>Contenido</h2>
-      ${contenido || '<p>En desarrollo...</p>'}
-    </div>
-    ${pdfUrl ? `<a href="${pdfUrl}" target="_blank">Descargar PDF</a>` : ''}
-  </main>
-  <script src="../../js/particles.js"></script>
-</body>
-</html>`;
+  const htmlCode = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Semana ${numero} - ${titulo}</title></head><body><h1>${titulo}</h1>${contenido}</body></html>`;
   
   document.getElementById('generatedCode').value = htmlCode;
   openModal('modalCode');
 }
 
-// ========== COPIAR CÓDIGO ==========
 function copyGeneratedCode() {
   const textarea = document.getElementById('generatedCode');
   textarea.select();
@@ -696,7 +698,6 @@ function copyToClipboard() {
   });
 }
 
-// ========== DESCARGAR HTML ==========
 function downloadHTML() {
   const code = document.getElementById('generatedCode').value;
   const blob = new Blob([code], { type: 'text/html' });
@@ -708,7 +709,6 @@ function downloadHTML() {
   showToast('✅ HTML descargado', 'success');
 }
 
-// ========== EXPORTAR DATOS ==========
 function exportarDatos() {
   const dataStr = JSON.stringify(appData, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
@@ -718,16 +718,6 @@ function exportarDatos() {
   a.download = 'basedatosii_backup.json';
   a.click();
   showToast('✅ Datos exportados', 'success');
-}
-
-// ========== GUARDAR CONFIGURACIÓN ==========
-function guardarConfiguracion() {
-  const curso = document.getElementById('configCurso')?.value;
-  const profesor = document.getElementById('configProfesor')?.value;
-  const ciclo = document.getElementById('configCiclo')?.value;
-  
-  localStorage.setItem('configCurso', JSON.stringify({ curso, profesor, ciclo }));
-  showToast('✅ Configuración guardada', 'success');
 }
 
 // ========== APLICAR HTML PEGADO ==========
@@ -750,36 +740,10 @@ function aplicarHTMLPegado() {
       }
     }
     
-    const paragraphs = htmlCode.match(/<p[^>]*>([^<]+)<\/p>/g);
-    if (paragraphs) {
-      for (let p of paragraphs) {
-        const content = p.replace(/<[^>]+>/g, '').trim();
-        if (content.length > 20) {
-          document.getElementById('createDescripcion').value = content;
-          break;
-        }
-      }
-    }
-    
-    const pdfMatch = htmlCode.match(/href=["']([^"']*\.pdf[^"']*)["']/i) || 
-                     htmlCode.match(/drive\.google\.com[^"'\s]*/i) ||
-                     htmlCode.match(/href=["']([^"']*download[^"']*)["']/i);
+    const pdfMatch = htmlCode.match(/href=["']([^"']*\.pdf[^"']*)["']/i) || htmlCode.match(/drive\.google\.com[^"'\s]*/i);
     if (pdfMatch) {
       const pdfUrl = pdfMatch[1] || pdfMatch[0];
       document.getElementById('createPDF').value = pdfUrl.startsWith('http') ? pdfUrl : 'https://' + pdfUrl;
-    }
-    
-    const videoMatch = htmlCode.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/i) ||
-                       htmlCode.match(/href=["']([^"']*(?:youtube|youtu\.be)[^"']*)["']/i);
-    if (videoMatch) {
-      const videoUrl = videoMatch[1] || videoMatch[0];
-      document.getElementById('createVideo').value = videoUrl.startsWith('http') ? videoUrl : 'https://' + videoUrl;
-    }
-    
-    if (htmlCode.includes('disponible') || htmlCode.includes('badge-success')) {
-      document.getElementById('createEstado').value = 'disponible';
-    } else if (htmlCode.includes('proximo') || htmlCode.includes('badge-warning')) {
-      document.getElementById('createEstado').value = 'proximo';
     }
     
     document.getElementById('createContenido').value = htmlCode;
@@ -791,28 +755,23 @@ function aplicarHTMLPegado() {
       }
     }
     
-    showToast('✅ HTML aplicado correctamente', 'success');
+    showToast('✅ HTML aplicado', 'success');
     
   } catch (error) {
-    console.error('Error al procesar HTML:', error);
     showToast('❌ Error al procesar el HTML', 'error');
   }
 }
 
-// ========== LIMPIAR HTML PEGADO ==========
 function limpiarHTMLPegado() {
   document.getElementById('createHTMLPaste').value = '';
   showToast('🧹 Campo HTML limpiado', 'success');
 }
 
-// ========== VISTA PREVIA MEJORADA ==========
 function previewSemana() {
   const titulo = document.getElementById('createTitulo').value || 'Sin título';
   const numero = document.getElementById('createNumero').value || '?';
-  const descripcion = document.getElementById('createDescripcion').value || 'Sin descripción';
   const contenido = document.getElementById('createContenido').value || '<p>Contenido en desarrollo...</p>';
   const pdfUrl = document.getElementById('createPDF').value;
-  const videoUrl = document.getElementById('createVideo').value;
   const estado = document.getElementById('createEstado').value;
   const unidadSelect = document.getElementById('createUnidad');
   const unidad = unidadSelect?.options[unidadSelect.selectedIndex]?.text || 'Sin unidad';
@@ -825,38 +784,16 @@ function previewSemana() {
   
   const previewHTML = `
     <div style="padding: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
         <span class="badge badge-info">Semana ${numero}</span>
         ${estadoBadge}
       </div>
-      <h2 style="color: #00ffc3; margin-bottom: 10px;">${titulo}</h2>
-      <p style="color: #94a3b8; margin-bottom: 20px;"><strong>Unidad:</strong> ${unidad}</p>
-      
-      <div style="background: rgba(0,255,195,0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h4 style="color: #00ffc3; margin-bottom: 10px;">📝 Descripción</h4>
-        <p style="color: #cbd5e1; line-height: 1.6;">${descripcion}</p>
+      <h2 style="color: #00ffc3;">${titulo}</h2>
+      <p style="color: #94a3b8;"><strong>Unidad:</strong> ${unidad}</p>
+      <div style="background: #0f172a; padding: 20px; border-radius: 10px; margin: 20px 0;">
+        ${contenido}
       </div>
-      
-      <div style="background: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h4 style="color: #00ffc3; margin-bottom: 10px;">📚 Contenido</h4>
-        <div style="color: white; line-height: 1.6;">${contenido}</div>
-      </div>
-      
-      ${pdfUrl ? `
-      <div style="margin-bottom: 15px;">
-        <a href="${pdfUrl}" target="_blank" style="color: #00ffc3; text-decoration: none;">
-          <i class="fas fa-file-pdf"></i> Ver PDF
-        </a>
-      </div>
-      ` : ''}
-      
-      ${videoUrl ? `
-      <div style="margin-bottom: 15px;">
-        <a href="${videoUrl}" target="_blank" style="color: #00ffc3; text-decoration: none;">
-          <i class="fas fa-video"></i> Ver Video
-        </a>
-      </div>
-      ` : ''}
+      ${pdfUrl ? `<a href="${pdfUrl}" target="_blank" style="color: #00ffc3;"><i class="fas fa-file-pdf"></i> Ver PDF</a>` : ''}
     </div>
   `;
   
@@ -864,15 +801,9 @@ function previewSemana() {
   openModal('modalPreview');
 }
 
-// ========== USAR ESTE CONTENIDO PARA CREAR ==========
 function usarContenidoParaCrear() {
   closeModal('modalPreview');
-  showToast('✅ Contenido listo. Haz clic en "Crear Semana" para guardar', 'success');
-  
-  document.querySelector('#formCrearSemana .btn-success')?.scrollIntoView({ 
-    behavior: 'smooth', 
-    block: 'center' 
-  });
+  showToast('✅ Contenido listo', 'success');
 }
 
-console.log('✅ Admin.js (Supabase) cargado correctamente');
+console.log('✅ Admin.js cargado correctamente');

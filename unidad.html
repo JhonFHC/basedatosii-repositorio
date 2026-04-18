@@ -372,5 +372,25 @@
       </a>
     </div>
   </main>
+
+  <!-- ========== SCRIPT PARA ACTUALIZAR TÍTULO DEL CURSO ========== -->
+  <script>
+    (function() {
+      const config = JSON.parse(localStorage.getItem('configCurso') || '{}');
+      const nombreCurso = config.curso || 'Base de Datos II';
+      
+      // Actualizar todos los h1 y títulos que contengan "Base de Datos II"
+      document.querySelectorAll('h1, h2, h3, .titulo-principal h1').forEach(el => {
+        if (el.textContent.includes('Base de Datos')) {
+          el.textContent = el.textContent.replace(/Base de Datos II?/g, nombreCurso);
+        }
+      });
+      
+      // Actualizar título de la página
+      if (document.title.includes('Base de Datos')) {
+        document.title = document.title.replace(/Base de Datos II?/g, nombreCurso);
+      }
+    })();
+  </script>
 </body>
 </html>

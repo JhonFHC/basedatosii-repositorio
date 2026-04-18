@@ -1,4 +1,4 @@
-// semana.js - Carga el contenido de una semana específica (CON RECURSOS DINÁMICOS)
+// semana.js - Carga el contenido de una semana específica (VERSIÓN MEJORADA)
 document.addEventListener('DOMContentLoaded', async function() {
   
   // Obtener ID de la URL
@@ -38,7 +38,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       throw new Error('Semana no encontrada');
     }
     
-    // Renderizar contenido base (SIN recursos aún)
+    // Actualizar título del curso desde configuración
+    const configCurso = JSON.parse(localStorage.getItem('configCurso') || '{}');
+    const nombreCurso = configCurso.curso || 'Base de Datos II';
+    document.title = `Semana ${semana.numero} - ${nombreCurso}`;
+    
+    // Renderizar contenido base (SIN descripción duplicada)
     container.innerHTML = `
       <div class="semana-header">
         <span class="badge-semana">
@@ -131,7 +136,7 @@ function formatearFecha(fecha) {
   });
 }
 
-// Renderizar recursos (PDF, Video, Archivos subidos) - AHORA CON ENLACES AL VISOR
+// Renderizar recursos (PDF, Video, Archivos subidos) - VERSIÓN MEJORADA
 async function renderRecursos(semana) {
   const recursos = [];
   
@@ -142,11 +147,12 @@ async function renderRecursos(semana) {
         <i class="fas fa-file-pdf"></i>
         <h3>Material PDF</h3>
         <p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">Clase ${semana.numero}</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
+        <div style="display: flex; gap: 8px; justify-content: center; font-size: 0.9rem;">
           <a href="visor.html?file=${encodeURIComponent(semana.pdf_url)}&name=${encodeURIComponent('Material PDF - Semana ' + semana.numero)}" 
              style="color: #00ffc3; text-decoration: none; font-weight: bold;">
             <i class="fas fa-eye"></i> Ver
           </a>
+          <span style="color: #334155;">|</span>
           <a href="${semana.pdf_url}" target="_blank" style="color: #00ffc3; text-decoration: none; font-weight: bold;">
             <i class="fas fa-download"></i> Descargar
           </a>
@@ -162,11 +168,12 @@ async function renderRecursos(semana) {
         <i class="fas fa-video"></i>
         <h3>Video de Clase</h3>
         <p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">Grabación Semana ${semana.numero}</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
+        <div style="display: flex; gap: 8px; justify-content: center; font-size: 0.9rem;">
           <a href="visor.html?file=${encodeURIComponent(semana.video_url)}&name=${encodeURIComponent('Video Semana ' + semana.numero)}" 
              style="color: #00ffc3; text-decoration: none; font-weight: bold;">
             <i class="fas fa-eye"></i> Ver
           </a>
+          <span style="color: #334155;">|</span>
           <a href="${semana.video_url}" target="_blank" style="color: #00ffc3; text-decoration: none; font-weight: bold;">
             <i class="fas fa-external-link-alt"></i> Abrir
           </a>
@@ -188,30 +195,47 @@ async function renderRecursos(semana) {
         let icono = 'fa-file';
         let tipoArchivo = 'Archivo';
         
-        if (archivo.url?.includes('.pdf') || archivo.nombre?.includes('.pdf')) {
+        // Detectar tipo por extensión
+        const nombreLower = archivo.nombre?.toLowerCase() || '';
+        const urlLower = archivo.url?.toLowerCase() || '';
+        
+        if (nombreLower.includes('.pdf') || urlLower.includes('.pdf')) {
           icono = 'fa-file-pdf';
           tipoArchivo = 'PDF';
-        } else if (archivo.url?.includes('.doc') || archivo.nombre?.includes('.doc')) {
+        } else if (nombreLower.includes('.doc') || urlLower.includes('.doc')) {
           icono = 'fa-file-word';
           tipoArchivo = 'Word';
-        } else if (archivo.url?.includes('.xls') || archivo.nombre?.includes('.xls')) {
+        } else if (nombreLower.includes('.xls') || nombreLower.includes('.xlsx') || urlLower.includes('.xls')) {
           icono = 'fa-file-excel';
           tipoArchivo = 'Excel';
-        } else if (archivo.url?.includes('.jpg') || archivo.url?.includes('.png')) {
+        } else if (nombreLower.includes('.ppt') || urlLower.includes('.ppt')) {
+          icono = 'fa-file-powerpoint';
+          tipoArchivo = 'PowerPoint';
+        } else if (nombreLower.includes('.jpg') || nombreLower.includes('.png') || nombreLower.includes('.gif') || nombreLower.includes('.jpeg')) {
           icono = 'fa-file-image';
           tipoArchivo = 'Imagen';
+        } else if (nombreLower.includes('.zip') || nombreLower.includes('.rar')) {
+          icono = 'fa-file-archive';
+          tipoArchivo = 'Comprimido';
+        } else if (nombreLower.includes('.txt')) {
+          icono = 'fa-file-alt';
+          tipoArchivo = 'Texto';
         }
+        
+        // Icono de tipo (local o enlace)
+        const tipoIcono = archivo.tipo === 'local' ? ' 💾' : ' 🔗';
         
         recursos.push(`
           <div class="recurso-card">
             <i class="fas ${icono}"></i>
             <h3>${archivo.nombre}</h3>
-            <p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">${tipoArchivo}</p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
+            <p style="color: #94a3b8; font-size: 0.8rem; margin: 5px 0;">${tipoArchivo}${tipoIcono}</p>
+            <div style="display: flex; gap: 8px; justify-content: center; font-size: 0.9rem;">
               <a href="visor.html?file=${encodeURIComponent(archivo.url)}&name=${encodeURIComponent(archivo.nombre)}" 
                  style="color: #00ffc3; text-decoration: none; font-weight: bold;">
                 <i class="fas fa-eye"></i> Ver
               </a>
+              <span style="color: #334155;">|</span>
               <a href="${archivo.url}" target="_blank" style="color: #00ffc3; text-decoration: none; font-weight: bold;">
                 <i class="fas fa-download"></i> Descargar
               </a>
@@ -239,7 +263,7 @@ async function renderRecursos(semana) {
   `;
 }
 
-// Inyectar estilos necesarios para las semanas
+// Inyectar estilos necesarios para las semanas (VERSIÓN COMPLETA MANTENIENDO DISEÑO ORIGINAL)
 function inyectarEstilosSemanas() {
   if (document.getElementById('estilos-semanas')) return;
   
@@ -256,6 +280,137 @@ function inyectarEstilosSemanas() {
       margin-bottom: 15px;
     }
     
+    .semana-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 15px 0;
+      color: #94a3b8;
+    }
+    
+    .semana-meta span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .semana-meta i {
+      color: #00ffc3;
+    }
+    
+    .contenido-seccion {
+      background: rgba(30, 41, 59, 0.7);
+      padding: 30px;
+      border-radius: 15px;
+      margin: 30px 0;
+      border: 1px solid #334155;
+    }
+    
+    .contenido-seccion h2 {
+      color: #00ffc3;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .contenido-html {
+      color: #cbd5e1;
+      line-height: 1.8;
+    }
+    
+    .contenido-html h2, .contenido-html h3 {
+      color: #00ffc3;
+      margin: 25px 0 15px;
+    }
+    
+    .contenido-html pre {
+      background: #0f172a;
+      padding: 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+    
+    .contenido-html code {
+      color: #00ffc3;
+    }
+    
+    .btn-volver {
+      display: inline-block;
+      background: rgba(0, 255, 195, 0.1);
+      color: #00ffc3;
+      padding: 12px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 1px solid #00ffc3;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-volver:hover {
+      background: #00ffc3;
+      color: #0f172a;
+      transform: translateY(-3px);
+    }
+    
+    .error-message {
+      text-align: center;
+      padding: 60px 20px;
+      color: #ff6b6b;
+    }
+    
+    .error-message h3 {
+      margin: 20px 0;
+    }
+    
+    .recursos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .recurso-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid #334155;
+    }
+    
+    .recurso-card:hover {
+      transform: translateY(-5px);
+      border-color: #00ffc3;
+      box-shadow: 0 10px 25px rgba(0, 255, 195, 0.2);
+    }
+    
+    .recurso-card i {
+      font-size: 2.5rem;
+      color: #00ffc3;
+      margin-bottom: 15px;
+    }
+    
+    .recurso-card h3 {
+      color: white;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      word-break: break-word;
+    }
+    
+    .recurso-card a {
+      color: #00ffc3;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    
+    .recurso-card a:hover {
+      color: #00cfa3;
+      text-decoration: underline;
+    }
+    
+    /* Estilos para diagramas y elementos interactivos */
     .header-actividad {
       background: linear-gradient(135deg, rgba(0, 255, 195, 0.1), rgba(0, 207, 163, 0.05));
       padding: 25px;
@@ -530,51 +685,6 @@ function inyectarEstilosSemanas() {
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 14px;
-    }
-    
-    .recursos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    
-    .recurso-card {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      transition: all 0.3s ease;
-      border: 1px solid #334155;
-    }
-    
-    .recurso-card:hover {
-      transform: translateY(-5px);
-      border-color: #00ffc3;
-      box-shadow: 0 10px 25px rgba(0, 255, 195, 0.2);
-    }
-    
-    .recurso-card i {
-      font-size: 2.5rem;
-      color: #00ffc3;
-      margin-bottom: 15px;
-    }
-    
-    .recurso-card h3 {
-      color: white;
-      margin-bottom: 10px;
-      font-size: 1rem;
-      word-break: break-word;
-    }
-    
-    .recurso-card a {
-      color: #00ffc3;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    
-    .recurso-card a:hover {
-      text-decoration: underline;
     }
     
     #modalDiagrama {
