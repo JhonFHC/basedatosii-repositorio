@@ -199,6 +199,116 @@
       background: rgba(255, 107, 107, 0.1);
       border-radius: 15px;
     }
+
+    /* Badge para semana (por si se usa dinámicamente) */
+    .badge-semana {
+      display: inline-block;
+      background: rgba(0, 255, 195, 0.2);
+      color: #00ffc3;
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    /* Grids adicionales para arquitecturas e info (por si se usan) */
+    .arquitecturas-grid,
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .diagrama {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .diagrama-flecha {
+      font-size: 2rem;
+      color: #00ffc3;
+    }
+
+    /* ========== RESPONSIVE PARA SEMANA ========== */
+
+    @media (max-width: 768px) {
+      .semana-container {
+        margin-top: 80px;
+        padding: 15px;
+      }
+      
+      .semana-header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .semana-meta {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+      }
+      
+      .contenido-seccion {
+        padding: 20px 15px;
+      }
+      
+      .contenido-seccion h2 {
+        font-size: 1.3rem;
+      }
+      
+      .recursos-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .recurso-card {
+        padding: 15px;
+      }
+      
+      .btn-volver {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .semana-container {
+        margin-top: 70px;
+        padding: 10px;
+      }
+      
+      .semana-header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .badge-semana {
+        font-size: 0.8rem;
+        padding: 5px 15px;
+      }
+      
+      .contenido-seccion h2 {
+        font-size: 1.2rem;
+      }
+      
+      .arquitecturas-grid,
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .diagrama {
+        flex-direction: column;
+      }
+      
+      .diagrama-flecha {
+        transform: rotate(90deg);
+      }
+    }
   </style>
 </head>
 <body>

@@ -561,6 +561,221 @@
       color: #3b82f6;
       border: 1px solid #3b82f6;
     }
+
+    /* ========== MEJORAS RESPONSIVAS PARA ADMIN ========== */
+
+    @media (max-width: 1200px) {
+      .stats-grid-large {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .admin-nav a {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+      
+      .admin-badge-large {
+        font-size: 0.9rem;
+        padding: 6px 15px;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .form-container {
+        padding: 25px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar-admin {
+        padding: 10px 15px;
+        flex-wrap: wrap;
+      }
+      
+      .admin-logo {
+        gap: 10px;
+      }
+      
+      .admin-logo img {
+        height: 35px;
+      }
+      
+      .admin-badge-large {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+      }
+      
+      .admin-nav {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 5px;
+      }
+      
+      .admin-nav a {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+      
+      .btn-logout-admin {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      
+      .admin-container {
+        margin-top: 100px;
+      }
+      
+      .admin-sidebar {
+        width: 70px;
+        padding: 20px 8px;
+      }
+      
+      .sidebar-link span {
+        display: none;
+      }
+      
+      .sidebar-link {
+        justify-content: center;
+        padding: 12px;
+      }
+      
+      .sidebar-link i {
+        margin: 0;
+      }
+      
+      .admin-content {
+        margin-left: 70px;
+        padding: 20px 15px;
+      }
+      
+      .stats-grid-large {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .stat-card-detailed {
+        padding: 20px;
+      }
+      
+      .stat-value {
+        font-size: 2.5rem;
+      }
+      
+      .form-title {
+        font-size: 1.5rem;
+      }
+      
+      .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+      }
+      
+      .modal-content {
+        padding: 25px;
+      }
+      
+      .modal-header h3 {
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar-admin {
+        padding: 8px 10px;
+      }
+      
+      .admin-logo img {
+        height: 28px;
+      }
+      
+      .admin-badge-large i {
+        margin-right: 5px;
+      }
+      
+      .admin-badge-large span {
+        display: none;
+      }
+      
+      .admin-nav a {
+        padding: 5px 8px;
+        font-size: 0.7rem;
+      }
+      
+      .admin-container {
+        margin-top: 120px;
+      }
+      
+      .admin-content {
+        padding: 15px 10px;
+      }
+      
+      .stat-value {
+        font-size: 2rem;
+      }
+      
+      .stat-label {
+        font-size: 0.9rem;
+      }
+      
+      .form-container {
+        padding: 20px 15px;
+      }
+      
+      .form-title {
+        font-size: 1.3rem;
+      }
+      
+      .form-field label {
+        font-size: 0.9rem;
+      }
+      
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .btn {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 10px;
+        font-size: 0.8rem;
+      }
+      
+      .toast {
+        padding: 12px 20px;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .admin-sidebar {
+        display: none;
+      }
+      
+      .admin-content {
+        margin-left: 0;
+      }
+      
+      .admin-nav a span {
+        display: none;
+      }
+      
+      .admin-nav a i {
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>

@@ -190,3 +190,98 @@
   border-radius: 4px;
   margin-left: 5px;
 }
+
+/* ========== ESTILOS RESPONSIVOS PARA LOGIN ========== */
+
+@media (max-width: 768px) {
+  .login-container {
+    padding: 35px 25px;
+    max-width: 400px;
+  }
+  
+  .login-header i {
+    font-size: 3.5rem;
+  }
+  
+  .login-header h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-wrapper {
+    padding: 15px;
+    margin-top: 50px;
+  }
+  
+  .login-container {
+    padding: 25px 18px;
+  }
+  
+  .login-header {
+    margin-bottom: 25px;
+  }
+  
+  .login-header i {
+    font-size: 3rem;
+  }
+  
+  .login-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .login-header p {
+    font-size: 0.85rem;
+  }
+  
+  .input-group {
+    margin-bottom: 18px;
+  }
+  
+  .input-group input {
+    padding: 12px 15px 12px 45px;
+    font-size: 0.95rem;
+  }
+  
+  .input-group i {
+    left: 14px;
+    font-size: 1rem;
+  }
+  
+  .btn-login {
+    padding: 12px;
+    font-size: 1rem;
+  }
+  
+  .login-info {
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .login-info h4 {
+    font-size: 1rem;
+  }
+  
+  .login-info p {
+    font-size: 0.8rem;
+  }
+  
+  .volver-link {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-container {
+    padding: 20px 15px;
+  }
+  
+  .login-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .input-group input {
+    padding: 10px 12px 10px 40px;
+    font-size: 0.9rem;
+  }
+}

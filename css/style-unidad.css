@@ -80,3 +80,116 @@
   font-size: 0.8rem;
   margin-left: 10px;
 }
+
+/* ========== ESTILOS RESPONSIVOS PARA UNIDADES ========== */
+
+@media (max-width: 1024px) {
+  .unidad-main {
+    padding: 15px;
+  }
+  
+  .semanas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .unidad-main {
+    margin-top: 80px;
+    padding: 10px;
+  }
+  
+  .titulo-principal h1 {
+    font-size: 2rem;
+  }
+  
+  .titulo-principal p {
+    font-size: 1rem;
+  }
+  
+  .unidad-header {
+    padding: 15px;
+    gap: 12px;
+  }
+  
+  .unidad-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.8rem;
+  }
+  
+  .unidad-info h2 {
+    font-size: 1.2rem;
+  }
+  
+  .unidad-info p {
+    font-size: 0.85rem;
+  }
+  
+  .unidad-toggle {
+    font-size: 1.2rem;
+  }
+  
+  .semanas-grid {
+    grid-template-columns: 1fr;
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .semana-card {
+    padding: 18px;
+  }
+  
+  .semana-numero {
+    font-size: 1.4rem;
+  }
+  
+  .semana-card h3 {
+    font-size: 1rem;
+  }
+  
+  .semana-card p {
+    font-size: 0.8rem;
+  }
+  
+  .btn-volver {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .unidad-main {
+    margin-top: 70px;
+  }
+  
+  .titulo-principal h1 {
+    font-size: 1.6rem;
+  }
+  
+  .unidad-header {
+    padding: 12px;
+  }
+  
+  .unidad-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 1.5rem;
+  }
+  
+  .unidad-info h2 {
+    font-size: 1rem;
+  }
+  
+  .unidad-info p {
+    font-size: 0.75rem;
+  }
+  
+  .semana-card {
+    padding: 15px;
+  }
+  
+  .semana-numero {
+    font-size: 1.2rem;
+  }
+}

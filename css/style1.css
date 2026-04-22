@@ -333,3 +333,258 @@ body {
   transform: translate(-50%, -300%) scale(1.4);
   opacity: 1;
 }
+
+/* ========== ESTILOS RESPONSIVOS GLOBALES ========== */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 95%;
+    padding: 15px;
+    padding-top: 80px;
+  }
+  
+  .slider-3d {
+    width: 350px;
+    height: 260px;
+  }
+  
+  .slide {
+    width: 350px !important;
+    height: 260px !important;
+  }
+  
+  #prevBtn {
+    left: -40px;
+  }
+  
+  #nextBtn {
+    right: -40px;
+  }
+}
+
+/* Tablets pequeñas y celulares grandes */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  /* Navbar responsive */
+  .navbar {
+    padding: 8px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .navbar-left {
+    gap: 10px;
+  }
+  
+  .navbar-right {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .navbar a {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .logo {
+    height: 30px;
+  }
+  
+  .nombre-desarrollador-nav {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+  
+  /* Contenedor principal */
+  .container {
+    padding: 10px;
+    padding-top: 90px;
+  }
+  
+  /* Grids responsivos */
+  .grid-contenido {
+    grid-template-columns: 1fr !important;
+    gap: 15px;
+  }
+  
+  /* Slider 3D responsive */
+  .slider-3d {
+    width: 280px;
+    height: 200px;
+    margin: 30px auto;
+  }
+  
+  .slide {
+    width: 280px !important;
+    height: 200px !important;
+  }
+  
+  #prevBtn, #nextBtn {
+    padding: 6px 10px;
+    font-size: 1rem;
+  }
+  
+  #prevBtn {
+    left: -25px;
+  }
+  
+  #nextBtn {
+    right: -25px;
+  }
+  
+  .overlay {
+    padding: 10px;
+  }
+  
+  .overlay h3 {
+    font-size: 1rem;
+  }
+  
+  .overlay p {
+    font-size: 0.7rem;
+  }
+  
+  /* Secciones */
+  .seccion-contenido {
+    padding: 20px 15px;
+  }
+  
+  .seccion-contenido h1 {
+    font-size: 1.8rem;
+  }
+  
+  .seccion-contenido h2 {
+    font-size: 1.3rem;
+  }
+  
+  .seccion-contenido h3 {
+    font-size: 1.1rem;
+  }
+  
+  .icono-seccion {
+    font-size: 2.5rem;
+  }
+  
+  /* Tarjetas */
+  .tarjeta-info {
+    padding: 20px 15px;
+  }
+  
+  /* Botones */
+  .btn-unidades {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Celulares pequeños */
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+  
+  .navbar {
+    padding: 6px 8px;
+  }
+  
+  .navbar a {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .navbar-left, .navbar-right {
+    gap: 5px;
+  }
+  
+  .logo {
+    height: 25px;
+  }
+  
+  .nombre-desarrollador-nav {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .nombre-desarrollador-nav i {
+    display: none;
+  }
+  
+  .container {
+    padding-top: 100px;
+  }
+  
+  /* Slider más pequeño */
+  .slider-3d {
+    width: 240px;
+    height: 170px;
+  }
+  
+  .slide {
+    width: 240px !important;
+    height: 170px !important;
+  }
+  
+  #prevBtn {
+    left: -20px;
+  }
+  
+  #nextBtn {
+    right: -20px;
+  }
+  
+  /* Títulos */
+  .seccion-contenido h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header-title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .description {
+    font-size: 0.85rem;
+  }
+  
+  /* Botones */
+  .btn {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+  
+  .btn-unidades {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .navbar a span, 
+  .navbar a i + span {
+    display: none;
+  }
+  
+  .navbar a i {
+    margin-right: 0;
+  }
+  
+  .slider-3d {
+    width: 200px;
+    height: 140px;
+  }
+  
+  .slide {
+    width: 200px !important;
+    height: 140px !important;
+  }
+}
