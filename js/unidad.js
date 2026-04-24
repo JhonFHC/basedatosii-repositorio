@@ -222,7 +222,7 @@ function renderizarSemanas(semanas) {
     <div class="semana-card" onclick="verSemana(${semana.id})">
       <div class="semana-numero">Semana ${semana.numero}</div>
       <h3>${semana.titulo}</h3>
-      <p>${semana.descripcion || 'Contenido en desarrollo'}</p>
+      <p>${semana.descripcion || '           '}</p>
       <span class="semana-estado ${semana.estado === 'disponible' ? 'estado-disponible' : 'estado-proximo'}">
         ${semana.estado === 'disponible' ? '✓ Disponible' : '⏳ Próximamente'}
       </span>

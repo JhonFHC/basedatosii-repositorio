@@ -189,6 +189,60 @@
       transform: translateY(-5px);
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
+
+    /* ========== CORRECCIÓN NAVBAR MÓVIL ========== */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      
+      .navbar-left {
+        gap: 8px !important;
+      }
+      
+      .navbar-right {
+        gap: 5px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      
+      .navbar a {
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+      }
+      
+      .logo {
+        height: 28px !important;
+      }
+      
+      .nombre-desarrollador-nav {
+        font-size: 0.8rem !important;
+        padding: 5px 10px !important;
+      }
+      
+      /* Espacio para que el navbar no cubra el contenido */
+      .container {
+        padding-top: 120px !important;
+      }
+      
+      /* Slider centrado */
+      .slider-3d {
+        width: 280px !important;
+        height: 200px !important;
+        margin: 30px auto !important;
+      }
+      
+      .slide {
+        width: 280px !important;
+        height: 200px !important;
+      }
+      
+      #prevBtn { left: -20px !important; }
+      #nextBtn { right: -20px !important; }
+    }
   </style>
 </head>
 <body>

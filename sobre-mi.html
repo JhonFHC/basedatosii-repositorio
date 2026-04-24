@@ -255,6 +255,74 @@
     .dato-item .dato-texto a:hover {
       text-decoration: underline;
     }
+
+    /* ========== CORRECCIÓN ESPACIO NAVBAR MÓVIL ========== */
+    @media (max-width: 768px) {
+      .container {
+        padding-top: 120px !important;
+      }
+      
+      /* Navbar más compacto */
+      .navbar {
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      
+      .navbar-left {
+        gap: 8px !important;
+      }
+      
+      .navbar-right {
+        gap: 5px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      
+      .navbar a {
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+      }
+      
+      .logo {
+        height: 28px !important;
+      }
+      
+      .nombre-desarrollador-nav {
+        font-size: 0.8rem !important;
+        padding: 5px 10px !important;
+      }
+      
+      /* Ajustes de contenido */
+      .info-personal {
+        padding: 25px 20px;
+      }
+      
+      .info-personal h2 {
+        font-size: 1.5rem;
+      }
+      
+      .info-personal p {
+        font-size: 0.95rem;
+      }
+      
+      .seccion-habilidades {
+        padding: 25px 20px;
+      }
+      
+      .seccion-habilidades h3 {
+        font-size: 1.4rem;
+      }
+      
+      .tarjeta-habilidad {
+        padding: 20px;
+      }
+      
+      .datos-contacto {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>

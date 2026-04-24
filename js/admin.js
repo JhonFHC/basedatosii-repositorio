@@ -133,6 +133,15 @@ function switchPage(pageName) {
       }
     }
   });
+  
+  // === ACTUALIZAR NAVBAR SUPERIOR ACTIVO ===
+  document.querySelectorAll('.admin-nav a').forEach(link => {
+    link.classList.remove('active');
+    const onclick = link.getAttribute('onclick') || '';
+    if (onclick.includes(`'${pageName}'`)) {
+      link.classList.add('active');
+    }
+  });
 }
 
 // ========== DASHBOARD ==========
@@ -153,7 +162,7 @@ function cargarDashboard() {
         <td>${item.elemento}</td>
         <td>${new Date(item.created_at).toLocaleString()}</td>
         <td><span class="badge badge-success">Completado</span></td>
-      </tr>
+      </table>
     `).join('');
     tbody.innerHTML = actividadHTML || '<tr><td colspan="4" class="empty-state">No hay actividad</td></tr>';
   }
