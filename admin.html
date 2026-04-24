@@ -498,7 +498,7 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
-    /* ========== RESPONSIVE ========== */
+    /* ========== RESPONSIVE TABLET (1024px) ========== */
     @media (max-width: 1024px) {
       .admin-sidebar {
         width: 80px;
@@ -511,15 +511,10 @@
       }
     }
 
-    @media (max-width: 768px) {
-      .admin-sidebar {
-        display: none;
-      }
-      .admin-content {
-        margin-left: 0;
-      }
-      .form-grid {
-        grid-template-columns: 1fr;
+    /* ========== RESPONSIVE DESKTOP MEDIANO (1200px) ========== */
+    @media (max-width: 1200px) {
+      .stats-grid-large {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -562,226 +557,14 @@
       border: 1px solid #3b82f6;
     }
 
-    /* ========== MEJORAS RESPONSIVAS PARA ADMIN ========== */
-
-    @media (max-width: 1200px) {
-      .stats-grid-large {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 900px) {
-      .admin-nav a {
-        padding: 8px 12px;
-        font-size: 0.85rem;
-      }
-      
-      .admin-badge-large {
-        font-size: 0.9rem;
-        padding: 6px 15px;
-      }
-      
-      .form-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-      
-      .form-container {
-        padding: 25px;
-      }
-    }
-
+    /* ========== RESPONSIVE ADMIN (VERSIÓN CORREGIDA - BASADO EN SOBRE-MI) ========== */
     @media (max-width: 768px) {
+      /* Navbar compacto (MISMO ESTILO QUE FUNCIONÓ) */
       .navbar-admin {
-        padding: 10px 15px;
-        flex-wrap: wrap;
-      }
-      
-      .admin-logo {
-        gap: 10px;
-      }
-      
-      .admin-logo img {
-        height: 35px;
-      }
-      
-      .admin-badge-large {
-        font-size: 0.8rem;
-        padding: 5px 10px;
-      }
-      
-      .admin-nav {
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 5px;
-      }
-      
-      .admin-nav a {
-        padding: 6px 10px;
-        font-size: 0.75rem;
-      }
-      
-      .btn-logout-admin {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-      }
-      
-      .admin-container {
-        margin-top: 100px;
-      }
-      
-      .admin-sidebar {
-        width: 70px;
-        padding: 20px 8px;
-      }
-      
-      .sidebar-link span {
-        display: none;
-      }
-      
-      .sidebar-link {
-        justify-content: center;
-        padding: 12px;
-      }
-      
-      .sidebar-link i {
-        margin: 0;
-      }
-      
-      .admin-content {
-        margin-left: 70px;
-        padding: 20px 15px;
-      }
-      
-      .stats-grid-large {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-      
-      .stat-card-detailed {
-        padding: 20px;
-      }
-      
-      .stat-value {
-        font-size: 2.5rem;
-      }
-      
-      .form-title {
-        font-size: 1.5rem;
-      }
-      
-      .btn {
-        padding: 10px 18px;
-        font-size: 0.9rem;
-      }
-      
-      .modal-content {
-        padding: 25px;
-      }
-      
-      .modal-header h3 {
-        font-size: 1.4rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .navbar-admin {
-        padding: 8px 10px;
-      }
-      
-      .admin-logo img {
-        height: 28px;
-      }
-      
-      .admin-badge-large i {
-        margin-right: 5px;
-      }
-      
-      .admin-badge-large span {
-        display: none;
-      }
-      
-      .admin-nav a {
-        padding: 5px 8px;
-        font-size: 0.7rem;
-      }
-      
-      .admin-container {
-        margin-top: 120px;
-      }
-      
-      .admin-content {
-        padding: 15px 10px;
-      }
-      
-      .stat-value {
-        font-size: 2rem;
-      }
-      
-      .stat-label {
-        font-size: 0.9rem;
-      }
-      
-      .form-container {
-        padding: 20px 15px;
-      }
-      
-      .form-title {
-        font-size: 1.3rem;
-      }
-      
-      .form-field label {
-        font-size: 0.9rem;
-      }
-      
-      .form-field input,
-      .form-field select,
-      .form-field textarea {
-        padding: 10px 12px;
-        font-size: 0.9rem;
-      }
-      
-      .btn {
-        padding: 8px 14px;
-        font-size: 0.85rem;
-      }
-      
-      .data-table th,
-      .data-table td {
-        padding: 10px;
-        font-size: 0.8rem;
-      }
-      
-      .toast {
-        padding: 12px 20px;
-        font-size: 0.85rem;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .admin-sidebar {
-        display: none;
-      }
-      
-      .admin-content {
-        margin-left: 0;
-      }
-      
-      .admin-nav a span {
-        display: none;
-      }
-      
-      .admin-nav a i {
-        font-size: 1rem;
-      }
-    }
-
-    /* ========== RESPONSIVE ADMIN PARA CELULAR ========== */
-    @media (max-width: 768px) {
-      .navbar-admin {
-        padding: 8px 10px !important;
+        padding: 8px 12px !important;
+        gap: 8px !important;
         flex-wrap: wrap !important;
+        justify-content: center !important;
       }
       
       .admin-logo {
@@ -789,7 +572,7 @@
       }
       
       .admin-logo img {
-        height: 30px !important;
+        height: 28px !important;
       }
       
       .admin-badge-large {
@@ -805,19 +588,21 @@
       }
       
       .admin-nav a {
-        padding: 5px 8px !important;
+        padding: 6px 10px !important;
         font-size: 0.7rem !important;
       }
       
       .btn-logout-admin {
-        padding: 5px 10px !important;
+        padding: 6px 10px !important;
         font-size: 0.7rem !important;
       }
       
+      /* Layout principal - espacio para navbar */
       .admin-container {
         margin-top: 130px !important;
       }
       
+      /* Sidebar compacto */
       .admin-sidebar {
         width: 60px !important;
         padding: 15px 5px !important;
@@ -829,29 +614,107 @@
       
       .sidebar-link {
         justify-content: center !important;
-        padding: 10px !important;
+        padding: 12px !important;
       }
       
+      .sidebar-link i {
+        margin: 0 !important;
+        font-size: 1.2rem !important;
+      }
+      
+      /* Contenido principal */
       .admin-content {
         margin-left: 60px !important;
         padding: 15px 10px !important;
       }
       
+      /* Stats */
       .stats-grid-large {
         grid-template-columns: 1fr !important;
+        gap: 15px !important;
       }
       
+      .stat-card-detailed {
+        padding: 20px !important;
+      }
+      
+      .stat-value {
+        font-size: 2rem !important;
+      }
+      
+      .stat-label {
+        font-size: 0.9rem !important;
+      }
+      
+      /* Formularios */
       .form-grid {
         grid-template-columns: 1fr !important;
       }
       
-      .data-table {
-        font-size: 0.8rem !important;
+      .form-container {
+        padding: 20px 15px !important;
       }
       
+      .form-title {
+        font-size: 1.3rem !important;
+      }
+      
+      .form-field label {
+        font-size: 0.9rem !important;
+      }
+      
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        padding: 10px 12px !important;
+        font-size: 0.9rem !important;
+      }
+      
+      /* Botones */
       .btn {
         padding: 8px 12px !important;
         font-size: 0.8rem !important;
+      }
+      
+      /* Tablas */
+      .data-table {
+        font-size: 0.75rem !important;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 8px 10px !important;
+      }
+      
+      /* Modales */
+      .modal-content {
+        padding: 20px !important;
+        width: 95% !important;
+      }
+      
+      .modal-header h3 {
+        font-size: 1.2rem !important;
+      }
+      
+      /* Toast */
+      .toast {
+        padding: 12px 20px !important;
+        font-size: 0.85rem !important;
+      }
+    }
+
+    /* Celular pequeño */
+    @media (max-width: 480px) {
+      .admin-sidebar {
+        display: none !important;
+      }
+      
+      .admin-content {
+        margin-left: 0 !important;
+      }
+      
+      .admin-container {
+        margin-top: 140px !important;
       }
     }
   </style>

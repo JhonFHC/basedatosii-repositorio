@@ -237,11 +237,60 @@
       color: #00ffc3;
     }
 
-    /* ========== RESPONSIVE PARA SEMANA ========== */
+    /* Estilos para tablas comparativas (scroll horizontal en móvil) */
+    .tabla-comparativa,
+    .rubrica-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 10px;
+      overflow-x: auto;
+      display: block;
+    }
 
+    .tabla-comparativa th,
+    .tabla-comparativa td,
+    .rubrica-table th,
+    .rubrica-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+      color: #cbd5e1;
+    }
+
+    /* ========== RESPONSIVE PARA SEMANA (CORREGIDO) ========== */
     @media (max-width: 768px) {
+      /* Navbar compacto (IGUAL QUE SOBRE-MI) */
+      .navbar {
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      
+      .navbar-left { gap: 8px !important; }
+      
+      .navbar-right { 
+        gap: 5px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      
+      .navbar a { 
+        padding: 6px 10px !important; 
+        font-size: 0.75rem !important; 
+      }
+      
+      .logo { height: 28px !important; }
+      
+      .nombre-desarrollador-nav { 
+        font-size: 0.8rem !important; 
+        padding: 5px 10px !important; 
+      }
+      
+      /* Espacio para el navbar */
       .semana-container {
-        margin-top: 80px;
+        margin-top: 120px !important;
         padding: 15px;
       }
       
@@ -275,11 +324,41 @@
         padding: 10px 20px;
         font-size: 0.9rem;
       }
+
+      /* Ajustes para diagramas y tablas */
+      .arquitecturas-grid,
+      .info-grid {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .diagrama {
+        flex-direction: column;
+      }
+      
+      .diagrama-flecha {
+        transform: rotate(90deg);
+      }
+      
+      /* Tablas con scroll horizontal */
+      .tabla-comparativa,
+      .rubrica-table {
+        font-size: 0.75rem !important;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      
+      .tabla-comparativa th,
+      .tabla-comparativa td,
+      .rubrica-table th,
+      .rubrica-table td {
+        padding: 8px 10px !important;
+      }
     }
 
     @media (max-width: 480px) {
       .semana-container {
-        margin-top: 70px;
+        margin-top: 130px !important;
         padding: 10px;
       }
       
@@ -296,17 +375,9 @@
         font-size: 1.2rem;
       }
       
-      .arquitecturas-grid,
-      .info-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .diagrama {
-        flex-direction: column;
-      }
-      
-      .diagrama-flecha {
-        transform: rotate(90deg);
+      /* Ocultar iconos grandes en navbar */
+      .nombre-desarrollador-nav i {
+        display: none;
       }
     }
   </style>
