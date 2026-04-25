@@ -120,6 +120,17 @@
       transform: translateY(-2px);
     }
 
+    /* Fila superior del navbar admin (logo + hamburguesa) */
+    /* En desktop: se comporta como el admin-logo original (inline con admin-nav) */
+    .navbar-admin-top-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* En desktop el top-row no necesita justify-content: space-between */
+    /* El navbar-admin ya tiene justify-content: space-between entre top-row y admin-nav */
+
     /* ========== SIDEBAR ========== */
     .admin-sidebar {
       width: 280px;
@@ -204,6 +215,16 @@
       color: #0f172a;
       font-weight: bold;
       box-shadow: 0 5px 20px rgba(0, 255, 195, 0.3);
+    }
+
+    .sidebar-logout {
+      color: #ff6b6b !important;
+    }
+
+    .sidebar-logout:hover {
+      background: rgba(255, 107, 107, 0.15) !important;
+      color: #ff6b6b !important;
+      transform: translateX(5px);
     }
 
     .sidebar-divider {
@@ -564,6 +585,17 @@
       }
     }
 
+    /* En móvil, cuando el sidebar se abre como panel lateral,
+       siempre mostrar el texto de los links (anula el 1024px) */
+    @media (max-width: 768px) {
+      .admin-sidebar .sidebar-link span {
+        display: inline !important;
+      }
+      .admin-sidebar {
+        width: 280px !important;
+      }
+    }
+
     /* ========== RESPONSIVE DESKTOP MEDIANO (1200px) ========== */
     @media (max-width: 1200px) {
       .stats-grid-large {
@@ -616,158 +648,160 @@
       .menu-toggle-btn {
         display: block !important;
       }
-      
-      /* Navbar admin compacto */
+
+      /* Navbar: mismo patrón que sobre-mi — wrap natural, centrado */
       .navbar-admin {
         padding: 8px 12px !important;
         gap: 8px !important;
         flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+
+      /* top-row ocupa el ancho completo en móvil */
+      .navbar-admin-top-row {
+        width: 100% !important;
         justify-content: space-between !important;
       }
-      
+
       .admin-logo {
         gap: 8px !important;
       }
-      
+
       .admin-logo img {
         height: 28px !important;
       }
-      
+
       .admin-badge-large {
         font-size: 0.7rem !important;
-        padding: 5px 8px !important;
+        padding: 4px 8px !important;
       }
-      
-      /* Ocultar nav horizontal */
+
+      /* Nav links como segunda fila, centrados con wrap */
       .admin-nav {
-        display: none !important;
-        flex-direction: column;
-        width: 100%;
-        background: rgba(15, 23, 42, 0.98);
-        border-radius: 10px;
-        padding: 10px;
-        margin-top: 5px;
-        border: 1px solid #334155;
-      }
-      
-      .admin-nav.show {
         display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        margin-top: 0 !important;
       }
-      
+
       .admin-nav a {
-        padding: 10px 15px !important;
-        font-size: 0.9rem !important;
-        text-align: left;
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
       }
-      
+
       .btn-logout-admin {
-        margin-top: 5px;
-        width: 100%;
-        text-align: center;
-        padding: 10px !important;
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+        width: auto !important;
+        margin-top: 0 !important;
       }
-      
-      /* SIDEBAR - OCULTO POR DEFECTO, SE MUESTRA COMO PANEL LATERAL */
+
+      /* SIDEBAR - panel lateral deslizante */
       .admin-sidebar {
         transform: translateX(-100%);
         top: 0 !important;
         height: 100vh !important;
-        z-index: 1000 !important;
+        z-index: 1001 !important;
         width: 280px !important;
         padding-top: 60px !important;
       }
-      
+
       .admin-sidebar.open {
         transform: translateX(0);
         box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
       }
-      
-      /* Mostrar botón cerrar */
+
+      /* Mostrar botón cerrar dentro del sidebar */
       .sidebar-close-btn {
         display: block !important;
       }
-      
+
       /* Mostrar overlay cuando sidebar está abierto */
       .sidebar-overlay.active {
         display: block;
       }
-      
-      /* Contenido - OCUPAR TODO EL ANCHO */
+
+      /* CONTENEDOR PRINCIPAL — sin margin-left, JS ajustará margin-top */
       .admin-container {
-        margin-top: 80px !important;
         flex-direction: column;
+        margin-top: 0 !important; /* JS calcula la altura real del navbar */
       }
-      
+
       .admin-content {
         margin-left: 0 !important;
         padding: 15px 10px !important;
         width: 100% !important;
       }
-      
+
       /* Stats */
       .stats-grid-large {
         grid-template-columns: 1fr !important;
         gap: 15px !important;
       }
-      
+
       .stat-card-detailed {
         padding: 20px !important;
       }
-      
+
       .stat-value {
         font-size: 2rem !important;
       }
-      
+
       .stat-label {
         font-size: 0.9rem !important;
       }
-      
+
       /* Formularios */
       .form-grid {
         grid-template-columns: 1fr !important;
       }
-      
+
       .form-container {
         padding: 20px 15px !important;
         max-width: 100% !important;
       }
-      
+
       .form-title {
         font-size: 1.3rem !important;
       }
-      
+
       .form-field label {
         font-size: 0.9rem !important;
       }
-      
+
       .form-field input,
       .form-field select,
       .form-field textarea {
         padding: 10px 12px !important;
         font-size: 0.9rem !important;
       }
-      
+
       /* Botones */
       .btn {
         padding: 8px 12px !important;
         font-size: 0.8rem !important;
       }
-      
+
       /* Tablas con scroll horizontal */
       .data-table {
         font-size: 0.75rem !important;
         overflow-x: auto !important;
       }
-      
+
       .data-table table {
         min-width: 600px !important;
       }
-      
+
       .data-table th,
       .data-table td {
         padding: 8px 10px !important;
       }
-      
+
       /* Modales */
       .modal-content {
         padding: 20px !important;
@@ -775,11 +809,11 @@
         max-width: 95% !important;
         margin: 10px;
       }
-      
+
       .modal-header h3 {
         font-size: 1.2rem !important;
       }
-      
+
       /* Toast */
       .toast {
         padding: 12px 20px !important;
@@ -787,7 +821,7 @@
         bottom: 15px !important;
         right: 15px !important;
       }
-      
+
       /* Editor */
       .editor-container {
         padding: 10px !important;
@@ -795,18 +829,14 @@
     }
 
     @media (max-width: 480px) {
-      .admin-container {
-        margin-top: 70px !important;
-      }
-      
       .admin-badge-large span {
         display: none;
       }
-      
+
       .admin-badge-large i {
         margin: 0;
       }
-      
+
       .stat-value {
         font-size: 1.5rem !important;
       }
@@ -820,19 +850,22 @@
     }
   </script>
 
-  <nav class="navbar-admin">
-    <div class="admin-logo">
-      <img src="IMG/UPLA.png" alt="UPLA">
-      <span class="admin-badge-large">
-        <i class="fas fa-crown"></i> MODO ADMINISTRADOR
-      </span>
+  <nav class="navbar-admin" id="navbarAdmin">
+    <!-- Fila superior: logo + badge + hamburguesa -->
+    <div class="navbar-admin-top-row">
+      <div class="admin-logo">
+        <img src="IMG/UPLA.png" alt="UPLA">
+        <span class="admin-badge-large">
+          <i class="fas fa-crown"></i> <span>MODO ADMINISTRADOR</span>
+        </span>
+      </div>
+      <!-- BOTÓN HAMBURGUESA (solo visible en móvil, abre sidebar) -->
+      <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="Menú">
+        <i class="fas fa-bars"></i>
+      </button>
     </div>
-    
-    <!-- BOTÓN HAMBURGUESA PARA MÓVIL -->
-    <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="Menú">
-      <i class="fas fa-bars"></i>
-    </button>
-    
+
+    <!-- Fila inferior: links de navegación (siempre visibles en móvil como segunda fila) -->
     <div class="admin-nav" id="adminNav">
       <a href="#" onclick="switchPage('dashboard')" class="active" id="navDashboard">
         <i class="fas fa-chart-line"></i> Dashboard
@@ -901,6 +934,13 @@
           <a class="sidebar-link" onclick="switchPage('configuracion'); toggleSidebar()">
             <i class="fas fa-cog"></i>
             <span>Configuración</span>
+          </a>
+        </li>
+        <div class="sidebar-divider"></div>
+        <li class="sidebar-item">
+          <a class="sidebar-link sidebar-logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
           </a>
         </li>
       </ul>
@@ -1282,6 +1322,34 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="js/particles.js"></script>
+  <script>
+    // =============================================
+    // AJUSTE DINÁMICO DE MARGIN-TOP SEGÚN NAVBAR
+    // Soluciona el problema del container en móvil
+    // =============================================
+    function ajustarMarginContainer() {
+      const navbar = document.getElementById('navbarAdmin');
+      const container = document.querySelector('.admin-container');
+      const sidebar = document.getElementById('adminSidebar');
+      if (!navbar || !container) return;
+
+      const alturaNavbar = navbar.offsetHeight;
+      container.style.marginTop = alturaNavbar + 'px';
+
+      // El sidebar también debe empezar donde termina el navbar (solo en desktop)
+      if (window.innerWidth > 768 && sidebar) {
+        sidebar.style.top = alturaNavbar + 'px';
+        sidebar.style.height = 'calc(100vh - ' + alturaNavbar + 'px)';
+      }
+    }
+
+    // Ejecutar al cargar y al redimensionar
+    document.addEventListener('DOMContentLoaded', ajustarMarginContainer);
+    window.addEventListener('resize', ajustarMarginContainer);
+    // También al hacer cualquier cambio en el DOM (por si el navbar cambia de alto)
+    window.addEventListener('load', ajustarMarginContainer);
+  </script>
+
   <script>
     // Toggle sidebar en móvil
     function toggleSidebar() {

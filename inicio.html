@@ -190,25 +190,30 @@
     /* ========== CORRECCIÓN ESPACIO NAVBAR MÓVIL ========== */
     @media (max-width: 768px) {
       .container {
-        padding-top: 120px !important;
+        padding-top: 130px !important;
       }
 
-      /* Navbar más compacto */
+      /* Navbar en DOS FILAS: fila 1 = logo+nombre, fila 2 = links */
       nav.navbar {
+        flex-direction: column !important;
+        align-items: center !important;
         padding: 8px 12px !important;
-        gap: 8px !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
+        gap: 6px !important;
       }
 
+      /* Fila 1: logo + nombre centrados */
       .navbar-left {
+        width: 100% !important;
+        justify-content: center !important;
         gap: 8px !important;
       }
 
+      /* Fila 2: links centrados con wrap */
       .navbar-right {
-        gap: 5px !important;
-        flex-wrap: wrap !important;
+        width: 100% !important;
         justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 5px !important;
       }
 
       .navbar-right a,
