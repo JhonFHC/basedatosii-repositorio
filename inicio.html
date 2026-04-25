@@ -187,73 +187,68 @@
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
 
-    /* ========== CORRECCIÓN ESPACIO NAVBAR MÓVIL ========== */
+    /* ========== NAVBAR RESPONSIVE (MISMO ESTILO QUE SOBRE-MI) ========== */
     @media (max-width: 768px) {
+      /* Espacio para navbar */
       .container {
-        padding-top: 130px !important;
+        padding-top: 120px !important;
       }
-
-      /* Navbar en DOS FILAS: fila 1 = logo+nombre, fila 2 = links */
-      nav.navbar {
-        flex-direction: column !important;
-        align-items: center !important;
+      
+      /* Navbar compacto (MISMO QUE SOBRE-MI) */
+      .navbar {
         padding: 8px 12px !important;
-        gap: 6px !important;
-      }
-
-      /* Fila 1: logo + nombre centrados */
-      .navbar-left {
-        width: 100% !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
         justify-content: center !important;
+      }
+      
+      .navbar-left {
         gap: 8px !important;
       }
-
-      /* Fila 2: links centrados con wrap */
+      
       .navbar-right {
-        width: 100% !important;
-        justify-content: center !important;
-        flex-wrap: wrap !important;
         gap: 5px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
       }
-
-      .navbar-right a,
-      nav.navbar a {
+      
+      .navbar a {
         padding: 6px 10px !important;
         font-size: 0.75rem !important;
       }
-
+      
       .logo {
         height: 28px !important;
       }
-
+      
       .nombre-desarrollador-nav {
         font-size: 0.8rem !important;
         padding: 5px 10px !important;
       }
-
-      /* Slider */
+      
+      /* Slider centrado */
       .slider-3d {
         width: 280px !important;
         height: 200px !important;
         margin: 30px auto !important;
       }
-
+      
       .slide {
         width: 280px !important;
         height: 200px !important;
       }
-
+      
       #prevBtn { left: -20px !important; }
       #nextBtn { right: -20px !important; }
-
+      
       .seccion-contenido {
         padding: 20px 15px;
       }
-
+      
       .seccion-contenido h1 {
         font-size: 1.6rem;
       }
-
+      
       .icono-seccion {
         font-size: 2.5rem;
       }

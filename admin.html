@@ -121,15 +121,11 @@
     }
 
     /* Fila superior del navbar admin (logo + hamburguesa) */
-    /* En desktop: se comporta como el admin-logo original (inline con admin-nav) */
     .navbar-admin-top-row {
       display: flex;
       align-items: center;
       gap: 0;
     }
-
-    /* En desktop el top-row no necesita justify-content: space-between */
-    /* El navbar-admin ya tiene justify-content: space-between entre top-row y admin-nav */
 
     /* ========== SIDEBAR ========== */
     .admin-sidebar {
@@ -694,11 +690,9 @@
         font-size: 0.75rem !important;
       }
 
+      /* ===== OCULTAR BOTÓN "SALIR" EN EL NAVBAR SUPERIOR EN MÓVIL ===== */
       .btn-logout-admin {
-        padding: 6px 10px !important;
-        font-size: 0.75rem !important;
-        width: auto !important;
-        margin-top: 0 !important;
+        display: none !important;
       }
 
       /* SIDEBAR - panel lateral deslizante */
@@ -825,6 +819,13 @@
       /* Editor */
       .editor-container {
         padding: 10px !important;
+      }
+    }
+
+    /* ===== EN ESCRITORIO (LAPTOP Y MÁS GRANDES) OCULTAR EL "CERRAR SESIÓN" DEL SIDEBAR ===== */
+    @media (min-width: 769px) {
+      .sidebar-logout {
+        display: none !important;
       }
     }
 
