@@ -189,29 +189,37 @@
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
 
-    /* ========== RESPONSIVE (SOLO COMPORTAMIENTO, SIN ALTERAR DISEÑO ORIGINAL) ========== */
+    /* ========== RESPONSIVE - SOLUCIÓN CORRECTA ========== */
     @media (max-width: 768px) {
-      /* Espacio para navbar */
+      /* Espacio para navbar (altura dinámica) */
       .container {
         padding-top: 130px !important;
       }
       
-      /* Navbar: mantener diseño original pero hacerlo responsive */
+      /* Centrar navbar correctamente */
       .navbar {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
         padding: 8px 12px !important;
         gap: 8px !important;
-        flex-wrap: wrap !important;
+      }
+      
+      /* Clave: los bloques internos ocupan 100% y se centran */
+      .navbar-left,
+      .navbar-right {
+        width: 100% !important;
+        display: flex !important;
         justify-content: center !important;
       }
       
       .navbar-left {
         gap: 8px !important;
+        margin-bottom: 5px !important;
       }
       
       .navbar-right {
-        gap: 8px !important;
+        gap: 5px !important;
         flex-wrap: wrap !important;
-        justify-content: center !important;
       }
       
       .navbar a {
