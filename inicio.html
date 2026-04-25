@@ -189,53 +189,50 @@
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
 
-    /* ========== RESPONSIVE - SOLUCIÓN CORRECTA ========== */
+    /* ===== CONTENEDOR CONTROLADO PARA MÓVIL ===== */
     @media (max-width: 768px) {
-      /* Espacio para navbar (altura dinámica) */
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      /* 🔥 CONTENEDOR PRINCIPAL FIJO */
       .container {
+        width: 100%;
+        max-width: 420px; /* 📱 tamaño tipo celular real */
+        margin: 0 auto;
+        padding: 10px;
         padding-top: 130px !important;
       }
-      
-      /* Centrar navbar correctamente */
+
+      /* 🔥 NAVBAR COMO BLOQUE CENTRADO */
       .navbar {
+        width: 100%;
+        max-width: 420px;
+        left: 50%;
+        transform: translateX(-50%);
         justify-content: center !important;
         flex-wrap: wrap !important;
-        padding: 8px 12px !important;
-        gap: 8px !important;
       }
-      
-      /* Clave: los bloques internos ocupan 100% y se centran */
+
       .navbar-left,
       .navbar-right {
-        width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
+        width: 100%;
+        display: flex;
+        justify-content: center;
       }
-      
-      .navbar-left {
-        gap: 8px !important;
-        margin-bottom: 5px !important;
+
+      /* 🔥 EVITA DESBORDES */
+      * {
+        max-width: 100%;
       }
-      
-      .navbar-right {
-        gap: 5px !important;
-        flex-wrap: wrap !important;
+
+      img {
+        max-width: 100%;
+        height: auto;
       }
-      
-      .navbar a {
-        padding: 6px 10px !important;
-        font-size: 0.75rem !important;
-      }
-      
-      .logo {
-        height: 28px !important;
-      }
-      
-      .nombre-desarrollador-nav {
-        font-size: 0.75rem !important;
-        padding: 5px 10px !important;
-      }
-      
+
       /* Slider centrado */
       .slider-3d {
         width: 280px !important;
