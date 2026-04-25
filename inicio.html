@@ -144,6 +144,7 @@
       border-left: 4px solid #00ffc3;
     }
 
+    /* Mejoras para el slider */
     .slider-3d {
       position: relative;
       width: 100%;
@@ -167,6 +168,7 @@
       overflow: hidden;
     }
 
+    /* Botón de acceso a unidades */
     .btn-unidades {
       display: inline-block;
       background: linear-gradient(135deg, #00ffc3, #00cfa3);
@@ -187,14 +189,14 @@
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
 
-    /* ========== NAVBAR RESPONSIVE (MISMO ESTILO QUE SOBRE-MI) ========== */
+    /* ========== RESPONSIVE (SOLO COMPORTAMIENTO, SIN ALTERAR DISEÑO ORIGINAL) ========== */
     @media (max-width: 768px) {
       /* Espacio para navbar */
       .container {
-        padding-top: 120px !important;
+        padding-top: 130px !important;
       }
       
-      /* Navbar compacto (MISMO QUE SOBRE-MI) */
+      /* Navbar: mantener diseño original pero hacerlo responsive */
       .navbar {
         padding: 8px 12px !important;
         gap: 8px !important;
@@ -207,7 +209,7 @@
       }
       
       .navbar-right {
-        gap: 5px !important;
+        gap: 8px !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
       }
@@ -222,7 +224,7 @@
       }
       
       .nombre-desarrollador-nav {
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
         padding: 5px 10px !important;
       }
       
@@ -253,9 +255,44 @@
         font-size: 2.5rem;
       }
     }
+
+    @media (max-width: 480px) {
+      .container {
+        padding-top: 140px !important;
+      }
+      
+      .navbar a {
+        padding: 5px 8px !important;
+        font-size: 0.7rem !important;
+      }
+      
+      .logo {
+        height: 24px !important;
+      }
+      
+      .nombre-desarrollador-nav {
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+      }
+      
+      .slider-3d {
+        width: 240px !important;
+        height: 170px !important;
+      }
+      
+      .slide {
+        width: 240px !important;
+        height: 170px !important;
+      }
+      
+      .seccion-contenido h1 {
+        font-size: 1.4rem;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- NAVBAR - DISEÑO ORIGINAL RESTAURADO -->
   <nav class="navbar">
     <!-- Lado izquierdo: Logo y nombre -->
     <div class="navbar-left">
