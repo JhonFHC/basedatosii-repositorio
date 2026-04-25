@@ -2,15 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Base de Datos II - Repositorio Académico</title>
   <link rel="stylesheet" href="css/style1.css" />
-  <!-- CDN PÚBLICO GRATUITO -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script defer src="js/slider.js"></script>
   <script defer src="js/interacciones.js"></script>
   <style>
-    /* Estilo para navbar mejorado */
+    /* ========== ESTILOS NAVBAR (MISMO QUE SOBRE-MI) ========== */
     nav.navbar {
       background-color: #1e293b;
       padding: 10px 20px;
@@ -82,12 +81,20 @@
       background-color: #3b82f6;
     }
 
-    /* Estilos para las secciones de contenido */
+    /* ========== ESTILOS DE CONTENIDO ========== */
+    .container {
+      margin-top: 100px;
+      padding: 20px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .seccion-contenido {
-      background: rgba(30, 41, 59, 0.8);
-      padding: 30px;
+      background: rgba(30, 41, 59, 0.9);
+      padding: 35px;
       border-radius: 15px;
-      margin: 25px 0;
+      margin: 30px 0;
       box-shadow: 0 8px 25px rgba(0, 255, 195, 0.2);
       border: 1px solid #334155;
     }
@@ -102,19 +109,20 @@
     .seccion-contenido h2 {
       color: #00ffc3;
       margin: 20px 0 10px 0;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
     }
 
     .seccion-contenido h3 {
       color: #00ffc3;
       margin: 15px 0 8px 0;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
     }
 
     .seccion-contenido p {
       color: #cbd5e1;
-      line-height: 1.6;
-      margin-bottom: 15px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
     }
 
     .icono-seccion {
@@ -144,16 +152,74 @@
       border-left: 4px solid #00ffc3;
     }
 
-    /* Mejoras para el slider */
+    .tarjeta-info h3 {
+      color: #00ffc3;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
+
+    .tarjeta-info p {
+      color: #cbd5e1;
+      line-height: 1.6;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    /* ========== CONTROLES DEL SLIDER ========== */
+    .slider-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .slider-controls button {
+      background: linear-gradient(135deg, #00ffc3, #00cfa3);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: #0f172a;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .slider-controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 195, 0.4);
+      background: #00ffc3;
+    }
+
+    /* ========== SLIDER 3D ========== */
+    .slider-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 550px;
+      margin: 0 auto;
+    }
+
     .slider-3d {
       position: relative;
       width: 100%;
-      max-width: 500px;
-      height: 350px;
-      margin: 40px auto;
-      perspective: 1000px;
+      height: 380px;
+      perspective: 1200px;
       z-index: 5;
-      overflow: visible;
+      overflow: hidden;
+      border-radius: 15px;
+    }
+
+    .slider-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1s ease;
+      cursor: pointer;
     }
 
     .slide {
@@ -163,9 +229,44 @@
       left: 0;
       top: 0;
       backface-visibility: hidden;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 255, 195, 0.5);
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0, 255, 195, 0.3);
       overflow: hidden;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      padding: 20px 25px;
+      color: #00ffc3;
+      transform: translateY(100%);
+      transition: transform 0.4s ease;
+    }
+
+    .slide:hover .overlay {
+      transform: translateY(0);
+    }
+
+    .overlay h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .overlay p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #cbd5e1;
     }
 
     /* Botón de acceso a unidades */
@@ -173,13 +274,13 @@
       display: inline-block;
       background: linear-gradient(135deg, #00ffc3, #00cfa3);
       color: #0f172a;
-      padding: 15px 30px;
+      padding: 15px 35px;
       border-radius: 50px;
       text-decoration: none;
       font-weight: bold;
       font-size: 1.2rem;
       margin-top: 20px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s ease;
       border: none;
       cursor: pointer;
     }
@@ -189,117 +290,172 @@
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
 
-    /* ===== CONTENEDOR CONTROLADO PARA MÓVIL ===== */
+    /* ========== RESPONSIVE - LIMITADO SOLO EN MÓVIL ========== */
     @media (max-width: 768px) {
-
+      /* Limitar el ancho SOLO en móvil */
       body {
-        display: flex;
-        justify-content: center;
+        overflow-x: hidden;
       }
 
-      /* 🔥 CONTENEDOR PRINCIPAL FIJO */
       .container {
         width: 100%;
-        max-width: 420px; /* 📱 tamaño tipo celular real */
-        margin: 0 auto;
-        padding: 10px;
-        padding-top: 130px !important;
+        max-width: 420px !important;
+        margin: 0 auto !important;
+        padding: 15px !important;
+        margin-top: 80px !important;
       }
-
-      /* 🔥 NAVBAR COMO BLOQUE CENTRADO */
+      
+      /* Navbar responsive */
       .navbar {
-        width: 100%;
-        max-width: 420px;
-        left: 50%;
-        transform: translateX(-50%);
-        justify-content: center !important;
+        padding: 8px 12px !important;
+        gap: 8px !important;
         flex-wrap: wrap !important;
+        justify-content: center !important;
       }
-
-      .navbar-left,
+      
+      .navbar-left {
+        gap: 8px !important;
+      }
+      
       .navbar-right {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-
-      /* 🔥 EVITA DESBORDES */
-      * {
-        max-width: 100%;
-      }
-
-      img {
-        max-width: 100%;
-        height: auto;
-      }
-
-      /* Slider centrado */
-      .slider-3d {
-        width: 280px !important;
-        height: 200px !important;
-        margin: 30px auto !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
       }
       
-      .slide {
-        width: 280px !important;
-        height: 200px !important;
+      .navbar a {
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
       }
       
-      #prevBtn { left: -20px !important; }
-      #nextBtn { right: -20px !important; }
+      .logo {
+        height: 28px !important;
+      }
       
+      .nombre-desarrollador-nav {
+        font-size: 0.8rem !important;
+        padding: 5px 10px !important;
+      }
+      
+      /* Contenido */
       .seccion-contenido {
-        padding: 20px 15px;
+        padding: 20px 18px;
       }
       
       .seccion-contenido h1 {
         font-size: 1.6rem;
       }
       
+      .seccion-contenido h2 {
+        font-size: 1.4rem;
+      }
+      
+      .seccion-contenido h3 {
+        font-size: 1.1rem;
+      }
+      
+      .seccion-contenido p {
+        font-size: 0.95rem;
+      }
+      
       .icono-seccion {
         font-size: 2.5rem;
+      }
+      
+      .tarjeta-info {
+        padding: 18px 15px;
+      }
+      
+      .tarjeta-info h3 {
+        font-size: 1.2rem;
+      }
+      
+      .tarjeta-info p {
+        font-size: 0.9rem;
+      }
+      
+      /* Slider */
+      .slider-controls button {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+      }
+      
+      .slider-wrapper {
+        max-width: 280px;
+      }
+      
+      .slider-3d {
+        height: 200px;
+      }
+      
+      .overlay {
+        padding: 10px 12px;
+      }
+      
+      .overlay h3 {
+        font-size: 0.9rem;
+      }
+      
+      .overlay p {
+        font-size: 0.7rem;
+      }
+      
+      .btn-unidades {
+        padding: 12px 25px;
+        font-size: 1rem;
+      }
+
+      /* Evitar desbordes */
+      * {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      img, iframe, video {
+        max-width: 100%;
+        height: auto;
       }
     }
 
     @media (max-width: 480px) {
       .container {
-        padding-top: 140px !important;
-      }
-      
-      .navbar a {
-        padding: 5px 8px !important;
-        font-size: 0.7rem !important;
-      }
-      
-      .logo {
-        height: 24px !important;
-      }
-      
-      .nombre-desarrollador-nav {
-        font-size: 0.7rem !important;
-        padding: 4px 8px !important;
-      }
-      
-      .slider-3d {
-        width: 240px !important;
-        height: 170px !important;
-      }
-      
-      .slide {
-        width: 240px !important;
-        height: 170px !important;
+        max-width: 360px !important;
+        margin-top: 70px !important;
+        padding: 10px !important;
       }
       
       .seccion-contenido h1 {
         font-size: 1.4rem;
       }
+      
+      .seccion-contenido h2 {
+        font-size: 1.2rem;
+      }
+      
+      .seccion-contenido h3 {
+        font-size: 1rem;
+      }
+      
+      .slider-wrapper {
+        max-width: 260px;
+      }
+      
+      .slider-3d {
+        height: 170px;
+      }
+      
+      .slider-controls button {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- NAVBAR - DISEÑO ORIGINAL RESTAURADO -->
+  <!-- NAVBAR - IDENTICO A SOBRE-MI -->
   <nav class="navbar">
-    <!-- Lado izquierdo: Logo y nombre -->
     <div class="navbar-left">
       <a href="index.html" class="logo-link" aria-label="Inicio">
         <img src="IMG/UPLA.png" alt="Logo Universidad" class="logo" />
@@ -308,8 +464,6 @@
         <i class="fas fa-user"></i> Jhon Huaman Cardenas
       </div>
     </div>
-
-    <!-- Lado derecho: Navegación -->
     <div class="navbar-right">
       <a href="inicio.html" class="clicked"><i class="fas fa-home"></i> Inicio</a>
       <a href="sobre-mi.html"><i class="fas fa-user"></i> Sobre mí</a>
@@ -339,7 +493,6 @@
 
     <!-- Grid de información -->
     <div class="grid-contenido">
-      <!-- Tarjeta 1: Objetivos -->
       <div class="tarjeta-info fade-in">
         <h3><i class="fas fa-bullseye"></i> Objetivos del Curso</h3>
         <p><strong>• Consultas Avanzadas:</strong> Subconsultas correlacionadas, CTEs, Window Functions</p>
@@ -349,7 +502,6 @@
         <p><strong>• Transacciones:</strong> ACID, Niveles de Aislamiento, Control de Concurrencia</p>
       </div>
 
-      <!-- Tarjeta 2: Competencias -->
       <div class="tarjeta-info fade-in">
         <h3><i class="fas fa-graduation-cap"></i> Competencias Desarrolladas</h3>
         <p><strong>• Diseño Lógico:</strong> Normalización hasta 5FN, Modelado dimensional</p>
@@ -374,7 +526,6 @@
             integrales y competentes, con capacidad científica – tecnológica y responsabilidad social. 
             Promovemos la investigación, innovación y emprendimiento para el desarrollo sostenible.</p>
         </div>
-
         <div class="tarjeta-info">
           <h2><i class="fas fa-eye"></i> Visión</h2>
           <p>Ser una universidad de calidad con presencia nacional e internacional, reconocida por su excelencia 
@@ -392,69 +543,99 @@
       <h2>Entorno de Base de Datos II</h2>
       <p>Conoce las herramientas, entornos y metodologías que utilizaremos en este curso.</p>
       
-      <div class="slider-3d">
-        <div class="slider-container" id="sliderContainer">
-          <div class="slide" data-title="Oracle Database" data-desc="Sistema de gestión de BD empresarial">
-            <img src="IMG/oracle.png" alt="Oracle Database" />
-            <div class="overlay">
-              <h3>Oracle 19c</h3>
-              <p>Base de datos relacional líder en el mercado empresarial con soporte para PL/SQL avanzado.</p>
+      <div class="slider-wrapper">
+        <div class="slider-controls">
+          <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+          <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <div class="slider-3d">
+          <div class="slider-container" id="sliderContainer">
+            <div class="slide">
+              <img src="IMG/oracle.png" alt="Oracle Database" />
+              <div class="overlay">
+                <h3>Oracle 19c</h3>
+                <p>Base de datos relacional líder en el mercado empresarial con soporte para PL/SQL avanzado.</p>
+              </div>
             </div>
-          </div>
-          <div class="slide" data-title="PostgreSQL" data-desc="BD Open Source de alta performance">
-            <img src="IMG/postgresql-15.jpg" alt="PostgreSQL" />
-            <div class="overlay">
-              <h3>PostgreSQL 15</h3>
-              <p>Sistema de gestión de bases de datos objeto-relacional con soporte JSON y GIS.</p>
+            <div class="slide">
+              <img src="IMG/postgresql-15.jpg" alt="PostgreSQL" />
+              <div class="overlay">
+                <h3>PostgreSQL 15</h3>
+                <p>Sistema de gestión de bases de datos objeto-relacional con soporte JSON y GIS.</p>
+              </div>
             </div>
-          </div>
-          <div class="slide" data-title="Profesor del Curso" data-desc="Experto en Bases de Datos">
-            <img src="IMG/imagen3.jpg" alt="Profesor de BD II" />
-            <div class="overlay">
-              <h3>MG. RAUL ENRIQUE FERNANDEZ BEJARANO</h3>
-              <p>Especialista en administración de bases de datos, PL/SQL y optimización de queries.</p>
+            <div class="slide">
+              <img src="IMG/imagen3.jpg" alt="Profesor" />
+              <div class="overlay">
+                <h3>MG. RAUL ENRIQUE FERNANDEZ BEJARANO</h3>
+                <p>Especialista en administración de bases de datos, PL/SQL y optimización de queries.</p>
+              </div>
             </div>
-          </div>
-          <div class="slide" data-title="PL/SQL Developer" data-desc="IDE para desarrollo Oracle">
-            <img src="IMG/pl.png" alt="PL/SQL Developer" />
-            <div class="overlay">
-              <h3>PL/SQL Developer</h3>
-              <p>Entorno de desarrollo integrado para crear, depurar y optimizar código PL/SQL.</p>
+            <div class="slide">
+              <img src="IMG/pl.png" alt="PL/SQL Developer" />
+              <div class="overlay">
+                <h3>PL/SQL Developer</h3>
+                <p>Entorno de desarrollo integrado para crear, depurar y optimizar código PL/SQL.</p>
+              </div>
             </div>
-          </div>
-          <div class="slide" data-title="Modelado de Datos" data-desc="Diseño de BD relacionales">
-            <img src="IMG/data-modeler.png" alt="Modelado de Datos" />
-            <div class="overlay">
-              <h3>Oracle Data Modeler</h3>
-              <p>Herramienta para diseño lógico y físico de bases de datos con ingeniería inversa.</p>
+            <div class="slide">
+              <img src="IMG/data-modeler.png" alt="Data Modeler" />
+              <div class="overlay">
+                <h3>Oracle Data Modeler</h3>
+                <p>Herramienta para diseño lógico y físico de bases de datos con ingeniería inversa.</p>
+              </div>
             </div>
           </div>
         </div>
-
-        <button id="prevBtn" aria-label="Imagen anterior">◀</button>
-        <button id="nextBtn" aria-label="Siguiente imagen">▶</button>
       </div>
     </section>
   </main>
 
-  <!-- ========== SCRIPT PARA ACTUALIZAR TÍTULO DEL CURSO ========== -->
+  <!-- ========== SCRIPT SLIDER 3D ========== -->
   <script>
-    (function() {
-      const config = JSON.parse(localStorage.getItem('configCurso') || '{}');
-      const nombreCurso = config.curso || 'Base de Datos II';
-      
-      // Actualizar todos los h1, h2, h3 que contengan "Base de Datos"
-      document.querySelectorAll('h1, h2, h3, .titulo-principal h1').forEach(el => {
-        if (el.textContent.includes('Base de Datos')) {
-          el.textContent = el.textContent.replace(/Base de Datos II?/g, nombreCurso);
-        }
+    const sliderContainer = document.getElementById('sliderContainer');
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+    const radius = 400;
+    const theta = 360 / totalSlides;
+
+    function setupSlider() {
+      slides.forEach((slide, i) => {
+        const angle = theta * i;
+        slide.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
       });
-      
-      // Actualizar título de la página
-      if (document.title.includes('Base de Datos')) {
-        document.title = document.title.replace(/Base de Datos II?/g, nombreCurso);
+      rotateSlider();
+    }
+
+    function rotateSlider() {
+      const angle = theta * currentIndex * -1;
+      sliderContainer.style.transform = `translateZ(-${radius}px) rotateY(${angle}deg)`;
+    }
+
+    document.getElementById('prevBtn')?.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+      rotateSlider();
+    });
+
+    document.getElementById('nextBtn')?.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % totalSlides;
+      rotateSlider();
+    });
+
+    setupSlider();
+
+    const config = JSON.parse(localStorage.getItem('configCurso') || '{}');
+    const nombreCurso = config.curso || 'Base de Datos II';
+    document.querySelectorAll('h1, h2, h3').forEach(el => {
+      if (el.textContent.includes('Base de Datos')) {
+        el.textContent = el.textContent.replace(/Base de Datos II?/g, nombreCurso);
       }
-    })();
+    });
+    if (document.title.includes('Base de Datos')) {
+      document.title = document.title.replace(/Base de Datos II?/g, nombreCurso);
+    }
   </script>
   <script src="js/particles.js"></script>
 </body>
