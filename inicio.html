@@ -187,36 +187,68 @@
       box-shadow: 0 10px 30px rgba(0, 255, 195, 0.4);
     }
 
-    /* ========== SOLO RESPONSIVE PARA INICIO (NO DUPLICA NAVBAR) ========== */
+    /* ========== CORRECCIÓN ESPACIO NAVBAR MÓVIL ========== */
     @media (max-width: 768px) {
-      /* Espacio para navbar (style1.css ya maneja el navbar) */
       .container {
-        padding-top: 130px !important;
+        padding-top: 120px !important;
       }
-      
-      /* Slider centrado */
+
+      /* Navbar más compacto */
+      nav.navbar {
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+
+      .navbar-left {
+        gap: 8px !important;
+      }
+
+      .navbar-right {
+        gap: 5px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+
+      .navbar-right a,
+      nav.navbar a {
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+      }
+
+      .logo {
+        height: 28px !important;
+      }
+
+      .nombre-desarrollador-nav {
+        font-size: 0.8rem !important;
+        padding: 5px 10px !important;
+      }
+
+      /* Slider */
       .slider-3d {
         width: 280px !important;
         height: 200px !important;
         margin: 30px auto !important;
       }
-      
+
       .slide {
         width: 280px !important;
         height: 200px !important;
       }
-      
+
       #prevBtn { left: -20px !important; }
       #nextBtn { right: -20px !important; }
-      
+
       .seccion-contenido {
         padding: 20px 15px;
       }
-      
+
       .seccion-contenido h1 {
         font-size: 1.6rem;
       }
-      
+
       .icono-seccion {
         font-size: 2.5rem;
       }

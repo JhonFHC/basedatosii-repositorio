@@ -385,11 +385,21 @@ function inyectarEstilosSemanas() {
       box-shadow: 0 10px 25px rgba(0, 255, 195, 0.2);
     }
     
+    /* ========== ICONOS DE RECURSOS MÁS PEQUEÑOS ========== */
     .recurso-card i {
-      font-size: 2.5rem;
+      font-size: 1.8rem !important;
       color: #00ffc3;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
+    
+    .recurso-card a {
+      font-size: 0.85rem !important;
+    }
+    
+    .recurso-card div a {
+      font-size: 0.8rem !important;
+    }
+    /* ========== FIN ICONOS MÁS PEQUEÑOS ========== */
     
     .recurso-card h3 {
       color: white;
