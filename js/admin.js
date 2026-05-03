@@ -26,6 +26,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   cargarSelectUnidades();
   cargarConfiguracionGuardada();
   
+  // Cargar preguntas pendientes después de un breve delay
+  setTimeout(() => {
+    if (document.getElementById('tablaPreguntasPendientes')) {
+      cargarPreguntasPendientes();
+    }
+  }, 1500);
+  
   console.log('✅ Panel listo');
 });
 
@@ -104,7 +111,8 @@ function switchPage(pageName) {
     'archivos': 'archivos',
     'crearSemana': 'crearSemana',
     'editarSemana': 'editarSemana',
-    'configuracion': 'configuracion'
+    'configuracion': 'configuracion',
+    'preguntasPendientes': 'preguntasPendientes'
   };
   
   const targetPageName = pageMap[pageName] || pageName;
@@ -128,13 +136,13 @@ function switchPage(pageName) {
           (pageName === 'unidades' && text.includes('unidades')) ||
           (pageName === 'archivos' && text.includes('archivos')) ||
           (pageName === 'configuracion' && text.includes('config')) ||
+          (pageName === 'preguntasPendientes' && text.includes('preguntas')) ||
           text.includes(pageName.toLowerCase())) {
         link.classList.add('active');
       }
     }
   });
   
-  // === ACTUALIZAR NAVBAR SUPERIOR ACTIVO ===
   document.querySelectorAll('.admin-nav a').forEach(link => {
     link.classList.remove('active');
     const onclick = link.getAttribute('onclick') || '';
@@ -142,6 +150,10 @@ function switchPage(pageName) {
       link.classList.add('active');
     }
   });
+
+  if (pageName === 'preguntasPendientes') {
+    setTimeout(cargarPreguntasPendientes, 300);
+  }
 }
 
 // ========== DASHBOARD ==========
@@ -162,7 +174,7 @@ function cargarDashboard() {
         <td>${item.elemento}</td>
         <td>${new Date(item.created_at).toLocaleString()}</td>
         <td><span class="badge badge-success">Completado</span></td>
-      </table>
+      </tr>
     `).join('');
     tbody.innerHTML = actividadHTML || '<tr><td colspan="4" class="empty-state">No hay actividad</td></tr>';
   }
@@ -362,12 +374,10 @@ async function eliminarArchivo(id) {
   try {
     const archivo = appData.archivos.find(a => a.id === id);
     
-    // Eliminar de Storage si es local
     if (archivo?.tipo === 'local') {
       await supabase.storage.from('archivos').remove([archivo.nombre]);
     }
     
-    // Eliminar de la tabla
     const { error } = await supabase.from('archivos').delete().eq('id', id);
     if (error) throw error;
     
@@ -433,11 +443,6 @@ function mostrarMensajeUnidadDeshabilitada() {
   showToast('📢 Esta funcionalidad estará disponible próximamente', 'success');
 }
 
-// ========== ABRIR MODAL UNIDAD (DESHABILITADO) ==========
-function abrirModalUnidad() {
-  mostrarMensajeUnidadDeshabilitada();
-}
-
 // ========== GUARDAR UNIDAD ==========
 document.getElementById('formUnidad')?.addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -477,7 +482,7 @@ document.getElementById('formUnidad')?.addEventListener('submit', async function
   }
 });
 
-// ========== GUARDAR ARCHIVO (CON SANITIZACIÓN DE NOMBRES) ==========
+// ========== GUARDAR ARCHIVO ==========
 async function guardarArchivo() {
   let nombre = document.getElementById('fileName')?.value;
   const url = document.getElementById('fileUrl')?.value;
@@ -497,7 +502,6 @@ async function guardarArchivo() {
     let nombreFinal = nombre;
     
     if (subiendoArchivoLocal) {
-      // ========== SANITIZAR NOMBRE DEL ARCHIVO ==========
       let nombreOriginal = localFile.name;
       let extension = '';
       
@@ -522,7 +526,6 @@ async function guardarArchivo() {
       
       nombreFinal = nombreLimpio + extension;
       
-      // Si el usuario escribió un nombre, usarlo pero sanitizado
       if (nombre) {
         let nombreUsuario = nombre;
         const puntoUsuario = nombreUsuario.lastIndexOf('.');
@@ -813,6 +816,349 @@ function previewSemana() {
 function usarContenidoParaCrear() {
   closeModal('modalPreview');
   showToast('✅ Contenido listo', 'success');
+}
+
+// =============================================
+// ⭐⭐⭐ GESTIÓN DE PREGUNTAS PENDIENTES ⭐⭐⭐
+// =============================================
+
+async function cargarPreguntasPendientes() {
+  const tbody = document.getElementById('tablaPreguntasPendientes');
+  if (!tbody) return;
+  
+  const filtro = document.getElementById('filtroEstadoPreguntas')?.value || 'todas';
+  
+  let todasPreguntas = [];
+  try {
+    todasPreguntas = JSON.parse(localStorage.getItem('bdito_preguntas_pendientes') || '[]');
+  } catch (e) {
+    todasPreguntas = [];
+  }
+  
+  try {
+    if (typeof supabase !== 'undefined' && supabase) {
+      const { data, error } = await supabase
+        .from('preguntas_pendientes')
+        .select('*')
+        .order('fecha', { ascending: false });
+      
+      if (!error && data && data.length > 0) {
+        for (const p of data) {
+          const existe = todasPreguntas.some(lp => lp.pregunta === p.pregunta);
+          if (!existe) {
+            todasPreguntas.push({
+              pregunta: p.pregunta,
+              fecha: p.fecha,
+              estado: p.estado || 'pendiente',
+              usuario: p.usuario || 'Anónimo'
+            });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.log('ℹ️ Tabla preguntas_pendientes no disponible en Supabase');
+  }
+  
+  const frecuenciaPreguntas = {};
+  for (const p of todasPreguntas) {
+    const clave = p.pregunta.toLowerCase().trim();
+    if (!frecuenciaPreguntas[clave]) {
+      frecuenciaPreguntas[clave] = { ...p, veces: 1 };
+    } else {
+      frecuenciaPreguntas[clave].veces++;
+      if (new Date(p.fecha) > new Date(frecuenciaPreguntas[clave].fecha)) {
+        frecuenciaPreguntas[clave].fecha = p.fecha;
+      }
+    }
+  }
+  
+  let preguntasUnicas = Object.values(frecuenciaPreguntas);
+  
+  if (filtro !== 'todas') {
+    preguntasUnicas = preguntasUnicas.filter(p => p.estado === filtro);
+  }
+  
+  preguntasUnicas.sort((a, b) => {
+    if (a.estado !== b.estado) return a.estado === 'pendiente' ? -1 : 1;
+    return b.veces - a.veces;
+  });
+  
+  const totalPendientes = preguntasUnicas.filter(p => p.estado === 'pendiente').length;
+  const totalResueltas = preguntasUnicas.filter(p => p.estado === 'resuelta').length;
+  const masPedida = preguntasUnicas.length > 0 
+    ? preguntasUnicas[0] 
+    : null;
+  
+  const elTotalPendientes = document.getElementById('totalPreguntasPendientes');
+  const elTotalResueltas = document.getElementById('totalPreguntasResueltas');
+  const elMasPedida = document.getElementById('preguntaMasPedida');
+  const elVecesMasPedida = document.getElementById('vecesMasPedida');
+  
+  if (elTotalPendientes) elTotalPendientes.textContent = totalPendientes;
+  if (elTotalResueltas) elTotalResueltas.textContent = totalResueltas;
+  
+  if (masPedida) {
+    if (elMasPedida) {
+      elMasPedida.textContent = masPedida.pregunta.length > 80 
+        ? masPedida.pregunta.substring(0, 80) + '...' 
+        : masPedida.pregunta;
+    }
+    if (elVecesMasPedida) {
+      elVecesMasPedida.style.display = 'inline-block';
+      elVecesMasPedida.textContent = `🔥 ${masPedida.veces}x pedida`;
+    }
+  } else {
+    if (elMasPedida) elMasPedida.textContent = '-';
+    if (elVecesMasPedida) elVecesMasPedida.style.display = 'none';
+  }
+  
+  if (preguntasUnicas.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 50px; color: #64748b;">
+      <i class="fas fa-check-circle" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px; display: block; color: #10b981;"></i>
+      <p style="font-size: 1rem; margin: 5px 0;">¡Todas las preguntas han sido respondidas!</p>
+      <p style="font-size: 0.8rem;">Cuando un usuario use el botón "Reportar" en el chat, aparecerán aquí</p>
+    </td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = preguntasUnicas.map(p => `
+    <tr style="${p.veces >= 3 ? 'border-left: 3px solid #f59e0b;' : ''}">
+      <td style="text-align: center;">
+        <input type="checkbox" class="checkbox-pregunta" value="${escapeHtml(p.pregunta)}" style="width: 16px; height: 16px; cursor: pointer;">
+      </td>
+      <td>
+        <strong style="color: ${p.estado === 'resuelta' ? '#10b981' : '#f59e0b'};">${p.pregunta}</strong>
+        ${p.veces >= 3 ? `<br><span class="badge badge-warning" style="margin-top:5px; font-size: 0.7rem;"><i class="fas fa-fire"></i> Popular (${p.veces} veces)</span>` : ''}
+      </td>
+      <td style="font-size: 0.85rem; color: #94a3b8;">
+        <i class="far fa-calendar-alt" style="margin-right: 5px;"></i>${new Date(p.fecha).toLocaleDateString()}
+      </td>
+      <td style="text-align: center;">
+        <span class="badge ${p.veces >= 5 ? 'badge-warning' : 'badge-info'}" style="font-size: 0.75rem;">
+          <i class="fas fa-chart-bar" style="margin-right: 3px;"></i>${p.veces}x
+        </span>
+      </td>
+      <td>
+        ${p.estado === 'resuelta' 
+          ? '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Resuelta</span>' 
+          : '<span class="badge badge-warning"><i class="fas fa-clock"></i> Pendiente</span>'}
+      </td>
+      <td>
+        <div class="action-buttons">
+          <button class="btn-icon" onclick="generarPlantillaIndividual('${escapeHtml(p.pregunta)}')" title="Generar JSON con plantilla maestra">
+            <i class="fas fa-magic" style="color: #a78bfa;"></i>
+          </button>
+          ${p.estado === 'pendiente' 
+            ? `<button class="btn-icon" onclick="marcarComoResuelta('${escapeHtml(p.pregunta)}')" title="Marcar como resuelta">
+                <i class="fas fa-check" style="color: #10b981;"></i>
+              </button>` 
+            : ''}
+          <button class="btn-icon delete" onclick="eliminarPregunta('${escapeHtml(p.pregunta)}')" title="Eliminar">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ⭐⭐⭐ GENERAR JSON CON PLANTILLA MAESTRA NIVEL DIOS v2.0 ⭐⭐⭐
+function generarPlantillaDesdePreguntas() {
+  const checkboxes = document.querySelectorAll('.checkbox-pregunta:checked');
+  let preguntas = checkboxes.length > 0 ? Array.from(checkboxes).map(cb => cb.value) : [];
+  
+  if (preguntas.length === 0) {
+    const filas = document.querySelectorAll('#tablaPreguntasPendientes tr');
+    filas.forEach(fila => {
+      const celda = fila.querySelector('td:nth-child(2) strong');
+      if (celda) preguntas.push(celda.textContent);
+    });
+  }
+  
+  if (preguntas.length === 0) {
+    showToast('No hay preguntas para generar', 'error');
+    return;
+  }
+  
+  const plantilla = generarJSONPlantillaMaestra(preguntas);
+  document.getElementById('plantillaJSONGenerada').value = plantilla;
+  document.getElementById('seccionPlantillaJSON').style.display = 'block';
+  document.getElementById('seccionPlantillaJSON').scrollIntoView({ behavior: 'smooth' });
+}
+
+function generarPlantillaIndividual(pregunta) {
+  const plantilla = generarJSONPlantillaMaestra([pregunta]);
+  document.getElementById('plantillaJSONGenerada').value = plantilla;
+  document.getElementById('seccionPlantillaJSON').style.display = 'block';
+  document.getElementById('seccionPlantillaJSON').scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * PLANTILLA MAESTRA NIVEL DIOS v2.0
+ * Genera un bloque JSON completo listo para pegar en conocimiento.json
+ */
+function generarJSONPlantillaMaestra(preguntas) {
+  const bloques = preguntas.map((pregunta, index) => {
+    const preguntaLimpia = pregunta.replace(/[¿?¡!]/g, '').trim();
+    const palabras = preguntaLimpia.toLowerCase().split(/\s+/).filter(p => p.length > 2);
+    const palabrasSinTilde = preguntaLimpia.toLowerCase().replace(/[áéíóú]/g, m => ({'á':'a','é':'e','í':'i','ó':'o','ú':'u'}[m]));
+    
+    // Generar variantes de clave
+    const variantes = [
+      preguntaLimpia.toLowerCase(),
+      palabrasSinTilde,
+      ...palabras.slice(0, 5),
+      `qué es ${palabrasSinTilde}`,
+      `que es ${palabrasSinTilde}`,
+      `definición de ${palabrasSinTilde}`,
+      `definicion de ${palabrasSinTilde}`,
+      `explicame ${palabrasSinTilde}`,
+      `explícame ${palabrasSinTilde}`,
+      `dame un ejemplo de ${palabrasSinTilde}`,
+      `para qué sirve ${palabrasSinTilde}`,
+      `para que sirve ${palabrasSinTilde}`,
+      `me podrias explicar ${palabrasSinTilde}`
+    ];
+    
+    const clave = [...new Set(variantes.filter(v => v.length > 2))].join('|');
+    const titulo = preguntaLimpia.charAt(0).toUpperCase() + preguntaLimpia.slice(1);
+    const palabraPrincipal = palabras[0] || 'tema';
+    
+    return `  "${clave}": {
+    "titulo": "${titulo}",
+    "categoria": "general",
+    "dificultad": "intermedio",
+    "definicion": "Aquí va la definición completa de <strong>${palabraPrincipal}</strong>. Explica qué es, para qué sirve y su importancia. Usa <strong>negritas</strong> para conceptos clave y <code>código inline</code> para términos técnicos.",
+    "definicion_corta": "Aquí va una definición breve en máximo 15 palabras.",
+    "intenciones": {
+      "definicion": "Aquí va la definición DETALLADA de <strong>${palabraPrincipal}</strong>. Explica el concepto, su origen (si aplica), y cómo se relaciona con bases de datos. Incluye datos curiosos o históricos si son relevantes.\\n\\n📊 <strong>Características principales:</strong>\\n• Característica 1\\n• Característica 2\\n• Característica 3\\n\\n💡 <strong>Dato clave:</strong> Un dato importante que el estudiante deba recordar.",
+      "ejemplo": "Aquí va un ejemplo PRÁCTICO de <strong>${palabraPrincipal}</strong>. Si es código SQL/PL/NoSQL, usa <code>bloques de código</code>. Si es un concepto teórico, usa casos prácticos numerados.\\n\\n<code>-- Ejemplo práctico\\nSELECT * FROM ejemplo WHERE concepto = '${palabraPrincipal}';</code>\\n\\n📝 <strong>Explicación del ejemplo:</strong>\\nDescribe brevemente qué hace el código anterior.",
+      "codigo": "<code>-- Código de ejemplo para ${palabraPrincipal}\\n-- Agregar aquí el código SQL/PL/NoSQL relevante</code>",
+      "pasos": "📋 <strong>Cómo implementar/usar ${palabraPrincipal} paso a paso:</strong>\\n\\n1️⃣ <strong>Paso 1:</strong> Descripción del primer paso\\n2️⃣ <strong>Paso 2:</strong> Descripción del segundo paso\\n3️⃣ <strong>Paso 3:</strong> Descripción del tercer paso\\n4️⃣ <strong>Paso 4:</strong> Descripción del cuarto paso\\n5️⃣ <strong>Paso 5:</strong> Descripción del quinto paso",
+      "comparacion": "🆚 <strong>Comparación de ${palabraPrincipal}:</strong>\\n\\n• <strong>Opción A:</strong> Característica / ventaja / desventaja\\n• <strong>Opción B:</strong> Característica / ventaja / desventaja\\n• <strong>Opción A:</strong> Cuándo usarla\\n• <strong>Opción B:</strong> Cuándo usarla\\n\\n📊 <strong>Conclusión:</strong> Cuál elegir según el caso de uso.",
+      "ventajas": "✅ Ventaja 1 de ${palabraPrincipal}\\n✅ Ventaja 2 de ${palabraPrincipal}\\n✅ Ventaja 3 de ${palabraPrincipal}\\n✅ Ventaja 4 de ${palabraPrincipal}\\n✅ Ventaja 5 de ${palabraPrincipal}",
+      "desventajas": "⚠️ Desventaja 1 de ${palabraPrincipal}\\n⚠️ Desventaja 2 de ${palabraPrincipal}\\n⚠️ Desventaja 3 de ${palabraPrincipal}\\n⚠️ Limitación 1 de ${palabraPrincipal}",
+      "resumen": "🧠 Resumen breve de ${palabraPrincipal}: Una o dos frases que capturen lo esencial del concepto.",
+      "error": "🔧 <strong>Error común con ${palabraPrincipal}:</strong>\\n\\nDescripción del error frecuente que cometen los estudiantes.\\n\\n<strong>Causa:</strong> Por qué ocurre este error.\\n\\n<strong>Solución:</strong> Cómo resolverlo o evitarlo."
+    },
+    "relaciones": [
+      "tema_relacionado_1",
+      "tema_relacionado_2", 
+      "tema_relacionado_3",
+      "tema_opuesto_o_contrario"
+    ],
+    "ruta": [
+      "prerrequisito_1",
+      "prerrequisito_2",
+      "${palabraPrincipal}",
+      "tema_siguiente_1",
+      "tema_siguiente_2"
+    ],
+    "tags": ["${palabraPrincipal}", "pendiente", "agregar", "intermedio"],
+    "casos_reales": [
+      "🌍 Industria/Empresa real: Ejemplo concreto de dónde se usa ${palabraPrincipal} en el mundo real",
+      "🏢 PYME/Local: Ejemplo cercano de aplicación de ${palabraPrincipal}",
+      "🎓 Academia/Curso: Cómo se aplica ${palabraPrincipal} en el contexto del curso de BD II"
+    ],
+    "errores_comunes": [
+      "❌ Error frecuente 1: Descripción del error y su consecuencia",
+      "❌ Confusión típica: Los principiantes suelen confundir ${palabraPrincipal} con otro concepto",
+      "❌ Mala práctica: Algo que NO se debe hacer con ${palabraPrincipal}",
+      "❌ Error silencioso: Error que no da mensaje pero causa problemas"
+    ],
+    "faq": [
+      {"q": "¿Pregunta frecuente 1 sobre ${palabraPrincipal}?", "a": "Respuesta directa y útil."},
+      {"q": "¿Pregunta frecuente 2 sobre ${palabraPrincipal}?", "a": "Respuesta que aclare conceptos confusos."},
+      {"q": "¿Pregunta frecuente 3 sobre ${palabraPrincipal}?", "a": "Respuesta con mini-ejemplo si aplica."}
+    ]
+  }`;
+  });
+  
+  return bloques.join(',\n\n');
+}
+
+function marcarComoResuelta(pregunta) {
+  try {
+    const preguntas = JSON.parse(localStorage.getItem('bdito_preguntas_pendientes') || '[]');
+    const idx = preguntas.findIndex(p => p.pregunta === pregunta);
+    if (idx !== -1) {
+      preguntas[idx].estado = 'resuelta';
+      localStorage.setItem('bdito_preguntas_pendientes', JSON.stringify(preguntas));
+    }
+  } catch (e) {}
+  
+  showToast('✅ Marcada como resuelta', 'success');
+  cargarPreguntasPendientes();
+}
+
+function eliminarPregunta(pregunta) {
+  if (!confirm('¿Eliminar esta pregunta?')) return;
+  
+  try {
+    const preguntas = JSON.parse(localStorage.getItem('bdito_preguntas_pendientes') || '[]');
+    localStorage.setItem('bdito_preguntas_pendientes', JSON.stringify(preguntas.filter(p => p.pregunta !== pregunta)));
+  } catch (e) {}
+  
+  showToast('✅ Eliminada', 'success');
+  cargarPreguntasPendientes();
+}
+
+function limpiarPreguntas() {
+  if (!confirm('¿Eliminar TODAS las preguntas?')) return;
+  localStorage.removeItem('bdito_preguntas_pendientes');
+  showToast('✅ Limpiado', 'success');
+  cargarPreguntasPendientes();
+}
+
+function toggleSelectAllPreguntas() {
+  const selectAll = document.getElementById('selectAllPreguntas');
+  document.querySelectorAll('.checkbox-pregunta').forEach(cb => cb.checked = selectAll.checked);
+}
+
+function copiarPlantillaJSON() {
+  const textarea = document.getElementById('plantillaJSONGenerada');
+  textarea.select();
+  document.execCommand('copy');
+  showToast('✅ JSON copiado al portapapeles', 'success');
+}
+
+function descargarPlantillaJSON() {
+  const contenido = document.getElementById('plantillaJSONGenerada').value;
+  const blob = new Blob([contenido], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nuevo_conocimiento_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  showToast('✅ Plantilla descargada', 'success');
+}
+
+function exportarPreguntasCSV() {
+  const filas = document.querySelectorAll('#tablaPreguntasPendientes tr');
+  let csv = 'Pregunta,Fecha,Veces,Estado\n';
+  filas.forEach(fila => {
+    const celdas = fila.querySelectorAll('td');
+    if (celdas.length >= 4) {
+      const pregunta = celdas[1]?.textContent?.replace(/🔥 Popular.*/, '').trim() || '';
+      const fecha = celdas[2]?.textContent?.trim() || '';
+      const veces = celdas[3]?.textContent?.replace(/[^0-9]/g, '').trim() || '1';
+      const estado = celdas[4]?.textContent?.trim() || 'pendiente';
+      csv += `"${pregunta}","${fecha}","${veces}","${estado}"\n`;
+    }
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'preguntas_pendientes_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  showToast('✅ CSV exportado', 'success');
+}
+
+function escapeHtml(texto) {
+  const div = document.createElement('div');
+  div.textContent = texto;
+  return div.innerHTML;
 }
 
 console.log('✅ Admin.js cargado correctamente');
